@@ -1,5 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doorapp2/admin_homescreen/admin_homescreen.dart';
-import 'package:doorapp2/auth/admin_auth/admin_signup.dart';
+import 'package:doorapp2/auth/admin_auth/password.dart';
 import 'package:doorapp2/auth/user_auth/user_gmail_login.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -15,9 +16,21 @@ class AdminLogin extends StatefulWidget {
 class _AdminLoginState extends State<AdminLogin> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  bool isLoading = false; // Track loading state
-  String errorText = ''; // Track error message
-  bool passwordVisible = false; // Track password visibility
+  bool isLoading = false;
+  String errorText = '';
+  bool passwordVisible = false;
+
+  Future<bool> verifyDealerEmail(String enteredEmail) async {
+    try {
+      final dealerSnapshot = await FirebaseFirestore.instance
+          .collection('admin')
+          .where('email', isEqualTo: enteredEmail)
+          .get();
+      return dealerSnapshot.docs.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
+  }
 
   void login() async {
     setState(() {
@@ -32,6 +45,15 @@ class _AdminLoginState extends State<AdminLogin> {
       setState(() {
         isLoading = false;
         errorText = 'Please fill all fields.';
+      });
+      return;
+    }
+
+    bool isDealerEmail = await verifyDealerEmail(email);
+    if (!isDealerEmail) {
+      setState(() {
+        isLoading = false;
+        errorText = 'User not found.';
       });
       return;
     }
@@ -180,7 +202,7 @@ class _AdminLoginState extends State<AdminLogin> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => AdminSignIn()),
+                    MaterialPageRoute(builder: (context) => AdminPassword()),
                   );
                 },
               ),

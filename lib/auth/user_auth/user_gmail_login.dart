@@ -1,9 +1,9 @@
-import 'package:doorapp2/admin_homescreen/admin_homescreen.dart';
-import 'package:doorapp2/auth/admin_auth/admin_gmail_login.dart';
-import 'package:doorapp2/dealer_homescreen/dealer_homescreen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore package
+import 'package:doorapp2/auth/admin_auth/admin_gmail_login.dart';
+import 'package:doorapp2/dealer_homescreen/dealer_homescreen.dart';
 
 class UserGmailLogin extends StatefulWidget {
   const UserGmailLogin({Key? key});
@@ -15,9 +15,21 @@ class UserGmailLogin extends StatefulWidget {
 class _UserGmailLoginState extends State<UserGmailLogin> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  bool isLoading = false; // Track loading state
-  String errorText = ''; // Track error message
-  bool passwordVisible = false; // Track password visibility
+  bool isLoading = false;
+  String errorText = '';
+  bool passwordVisible = false;
+
+  Future<bool> verifyDealerEmail(String enteredEmail) async {
+    try {
+      final dealerSnapshot = await FirebaseFirestore.instance
+          .collection('dealers')
+          .where('email', isEqualTo: enteredEmail)
+          .get();
+      return dealerSnapshot.docs.isNotEmpty;
+    } catch (e) {
+      return false;
+    }
+  }
 
   void login() async {
     setState(() {
@@ -32,6 +44,15 @@ class _UserGmailLoginState extends State<UserGmailLogin> {
       setState(() {
         isLoading = false;
         errorText = 'Please fill all fields.';
+      });
+      return;
+    }
+
+    bool isDealerEmail = await verifyDealerEmail(email);
+    if (!isDealerEmail) {
+      setState(() {
+        isLoading = false;
+        errorText = 'User not found.';
       });
       return;
     }
