@@ -1,12 +1,12 @@
+import 'package:doorapp2/admin_homescreen/admin_homescreen.dart';
 import 'package:doorapp2/auth/admin_auth/admin_gmail_login.dart';
-import 'package:doorapp2/auth/user_auth/user_signup.dart';
 import 'package:doorapp2/dealer_homescreen/dealer_homescreen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class UserGmailLogin extends StatefulWidget {
-  UserGmailLogin({Key? key});
+  const UserGmailLogin({Key? key});
 
   @override
   State<UserGmailLogin> createState() => _UserGmailLoginState();
@@ -15,31 +15,54 @@ class UserGmailLogin extends StatefulWidget {
 class _UserGmailLoginState extends State<UserGmailLogin> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  bool isLoading = false; // Track loading state
+  String errorText = ''; // Track error message
+  bool passwordVisible = false; // Track password visibility
 
   void login() async {
+    setState(() {
+      isLoading = true;
+      errorText = '';
+    });
+
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
 
     if (email == "" || password == "") {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Fill all Fields ')),
+      setState(() {
+        isLoading = false;
+        errorText = 'Please fill all fields.';
+      });
+      return;
+    }
+
+    try {
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
       );
-    } else {
-      try {
-        UserCredential userCredential = await FirebaseAuth.instance
-            .signInWithEmailAndPassword(email: email, password: password);
-        if (userCredential.user != null) {
-          Navigator.popUntil(context, (route) => route.isFirst);
-          Navigator.pushReplacement(
-              context,
-              CupertinoPageRoute(
-                  builder: (context) => const DealerHomeScreen()));
-        }
-      } on FirebaseAuthException catch (ex) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$ex')),
+
+      if (userCredential.user != null) {
+        Navigator.popUntil(context, (route) => route.isFirst);
+        Navigator.pushReplacement(
+          context,
+          CupertinoPageRoute(
+            builder: (context) => const DealerHomeScreen(),
+          ),
         );
       }
+    } on FirebaseAuthException catch (ex) {
+      setState(() {
+        isLoading = false;
+        if (ex.code == 'user-not-found') {
+          errorText = 'User not found.';
+        } else if (ex.code == 'wrong-password') {
+          errorText = 'Wrong password.';
+        } else {
+          errorText = 'An error occurred. Please try again later.';
+        }
+      });
     }
   }
 
@@ -82,7 +105,7 @@ class _UserGmailLoginState extends State<UserGmailLogin> {
             TextFormField(
               controller: passwordController,
               cursorColor: Colors.brown.shade900,
-              obscureText: true,
+              obscureText: !passwordVisible,
               decoration: InputDecoration(
                 labelText: 'Enter Password',
                 labelStyle: TextStyle(color: Colors.brown.shade900),
@@ -92,13 +115,24 @@ class _UserGmailLoginState extends State<UserGmailLogin> {
                     color: Colors.brown.shade900,
                   ),
                 ),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    passwordVisible ? Icons.visibility : Icons.visibility_off,
+                    color: Colors.brown.shade900,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      passwordVisible = !passwordVisible;
+                    });
+                  },
+                ),
               ),
             ),
             SizedBox(height: 24),
             Align(
               alignment: Alignment.center,
               child: ElevatedButton(
-                onPressed: login,
+                onPressed: isLoading ? null : login,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20.0,
@@ -107,34 +141,33 @@ class _UserGmailLoginState extends State<UserGmailLogin> {
                   backgroundColor: Colors.brown.shade900,
                   shape: StadiumBorder(),
                 ),
-                child: Text(
-                  "Login",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                child: isLoading
+                    ? CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      )
+                    : Text(
+                        "Login",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
               ),
             ),
             SizedBox(height: 16),
-            Center(
-              child: TextButton(
+            if (errorText.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Text(
-                  "Don't have an account? Sign Up",
+                  errorText,
                   style: TextStyle(
+                    color: Colors.red,
                     fontSize: 16,
-                    color: Colors.brown.shade900,
                   ),
                 ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => UserSignUp()),
-                  );
-                },
               ),
-            ),
+            SizedBox(height: 16),
             Center(
               child: TextButton(
                 child: Text(
