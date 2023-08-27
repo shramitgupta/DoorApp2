@@ -1,7 +1,6 @@
-import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:doorapp2/auth/admin_auth/admin_gmail_login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class AdminSignIn extends StatefulWidget {
@@ -12,68 +11,56 @@ class AdminSignIn extends StatefulWidget {
 }
 
 class _AdminSignInState extends State<AdminSignIn> {
-  final TextEditingController phonenoController = TextEditingController();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
 
-  void startPhoneNumberVerification(BuildContext context) async {
-    String phonenoString = phonenoController.text;
-    String phone = "+91" + phonenoString.trim();
+  bool isLoading = false;
+  String statusMessage = ''; // To show success/error message
 
-    try {
-      await FirebaseAuth.instance.verifyPhoneNumber(
-        phoneNumber: phone,
-        codeSent: (verificationId, resendToken) {
-          // Navigator.push(
-          //   context,
-          //   CupertinoPageRoute(
-          //     builder: (context) => AdminOtpSignup(
-          //       verificationId: verificationId,
-          //       onVerificationCompleted: (credential) {
-          //         signUpUser(context, phonenoString);
-          //       },
-          //     ),
-          //   ),
-          // );
-        },
-        verificationCompleted:
-            (credential) {}, // Empty function as a placeholder
-        verificationFailed: (ex) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Phone number verification failed: $ex')),
-          );
-        },
-        codeAutoRetrievalTimeout: (verificationId) {},
-        timeout: Duration(seconds: 30),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error while verifying phone number: $e')),
-      );
+  void signUp() async {
+    setState(() {
+      isLoading = true;
+      statusMessage = '';
+    });
+
+    String email = emailController.text.trim();
+    String password = passwordController.text.trim();
+
+    if (email == '' || password == '') {
+      setState(() {
+        isLoading = false;
+        statusMessage = 'Fill all fields.';
+      });
+      return;
     }
-  }
-
-  void signUpUser(BuildContext context, String phonenoString) async {
-    int phoneno = int.parse(phonenoString);
-
-    phonenoController.clear();
 
     try {
-      //final UserCredential userCredential = await _auth.signInAnonymously();
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
 
-      //String userId = userCredential.user!.uid;
+      if (userCredential.user != null) {
+        // Add user's email to Firestore collection
+        await FirebaseFirestore.instance.collection('admin').add({
+          'email': email,
+        });
 
-      await FirebaseFirestore.instance
-          .collection('Admin')
-          .doc()
-          .set({'contactNumber': phoneno});
-      log(phoneno.toString());
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Signup successful')),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Signup failed: $e')),
-      );
+        setState(() {
+          isLoading = false;
+          statusMessage = 'Successfully signed up!';
+        });
+
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => AdminLogin()));
+      }
+    } on FirebaseAuthException catch (ex) {
+      setState(() {
+        isLoading = false;
+        if (ex.code == 'email-already-in-use') {
+          statusMessage = 'Email already in use.';
+        } else {
+          statusMessage = 'An error occurred. Please try again later.';
+        }
+      });
     }
   }
 
@@ -83,123 +70,112 @@ class _AdminSignInState extends State<AdminSignIn> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Container(
-        color: const Color.fromARGB(255, 70, 63, 60),
-        child: Padding(
-          padding: const EdgeInsets.all(30.0),
-          child: Container(
-            color: const Color.fromARGB(255, 195, 162, 132),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: screenHeight * 0.1,
-                ),
-                const Text(
-                  " Admin",
-                  style: TextStyle(fontSize: 60, fontWeight: FontWeight.bold),
-                ),
-                const Text(
-                  " Sign Up",
-                  style: TextStyle(fontSize: 60, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(
-                  height: screenHeight * 0.01,
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextFormField(
-                    controller: phonenoController,
-                    cursorColor: const Color.fromARGB(255, 70, 63, 60),
-                    decoration: InputDecoration(
-                      labelText: 'Enter Phone No',
-                      labelStyle: const TextStyle(
-                          color: Color.fromARGB(255, 70, 63, 60)),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                        borderSide:
-                            const BorderSide(width: 3, color: Colors.white),
-                      ),
-                      focusedBorder: const OutlineInputBorder(
-                        borderSide: BorderSide(
-                          width: 3,
-                          color: Color.fromARGB(255, 70, 63, 60),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Container(
-                    margin: const EdgeInsets.all(10),
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        startPhoneNumberVerification(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20.0, vertical: 7.0),
-                        backgroundColor: Colors.white,
-                        shape: const StadiumBorder(),
-                      ),
-                      child: const Text(
-                        "Sign in",
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text('Already have an account?'),
-                    TextButton(
-                      child: const Text(
-                        'Login',
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: Colors.yellow,
-                        ),
-                      ),
-                      onPressed: () {
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //       builder: (context) => AdminPhoneNoLogin()),
-                        // );
-                      },
-                    )
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text('Login as Carpenter'),
-                    TextButton(
-                      child: const Text(
-                        'Carpenter',
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: Colors.yellow,
-                        ),
-                      ),
-                      onPressed: () {
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //       builder: (context) => UserPhoneNoLogin()),
-                        // );
-                      },
-                    )
-                  ],
-                ),
-              ],
+        color: Colors.white,
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: screenHeight * 0.1),
+            Text(
+              "Admin\nSign Up",
+              style: TextStyle(
+                fontSize: 60,
+                fontWeight: FontWeight.bold,
+                color: Colors.brown.shade900,
+              ),
             ),
-          ),
+            SizedBox(height: screenHeight * 0.1),
+            TextFormField(
+              controller: emailController,
+              cursorColor: Colors.brown.shade900,
+              decoration: InputDecoration(
+                labelText: 'Enter E-Mail',
+                labelStyle: TextStyle(color: Colors.brown.shade900),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    width: 3,
+                    color: Colors.brown.shade900,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 16),
+            TextFormField(
+              controller: passwordController,
+              cursorColor: Colors.brown.shade900,
+              obscureText: true,
+              decoration: InputDecoration(
+                labelText: 'Enter Password',
+                labelStyle: TextStyle(color: Colors.brown.shade900),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    width: 3,
+                    color: Colors.brown.shade900,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 24),
+            Align(
+              alignment: Alignment.center,
+              child: ElevatedButton(
+                onPressed: isLoading ? null : signUp,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20.0,
+                    vertical: 10.0,
+                  ),
+                  backgroundColor:
+                      isLoading ? Colors.grey : Colors.brown.shade900,
+                  shape: StadiumBorder(),
+                ),
+                child: isLoading
+                    ? CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      )
+                    : Text(
+                        "Sign Up",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+              ),
+            ),
+            SizedBox(height: 16),
+            if (statusMessage.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  statusMessage,
+                  style: TextStyle(
+                    color: statusMessage.contains('Success')
+                        ? Colors.green
+                        : Colors.red,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            SizedBox(height: 16),
+            Center(
+              child: TextButton(
+                child: Text(
+                  "Already have an account? Log In",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.brown.shade900,
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AdminLogin()),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );

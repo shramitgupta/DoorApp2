@@ -1,198 +1,208 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:doorapp2/admin_homescreen/admin_homescreen.dart';
+import 'package:doorapp2/auth/admin_auth/admin_signup.dart';
+import 'package:doorapp2/auth/user_auth/user_gmail_login.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-class AdminGmailLogin extends StatefulWidget {
-  AdminGmailLogin({Key? key});
+class AdminLogin extends StatefulWidget {
+  const AdminLogin({Key? key});
 
   @override
-  State<AdminGmailLogin> createState() => _AdminGmailLoginState();
+  State<AdminLogin> createState() => _AdminLoginState();
 }
 
-class _AdminGmailLoginState extends State<AdminGmailLogin> {
+class _AdminLoginState extends State<AdminLogin> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  bool isLoading = false; // Track loading state
+  String errorText = ''; // Track error message
+  bool passwordVisible = false; // Track password visibility
+
   void login() async {
+    setState(() {
+      isLoading = true;
+      errorText = '';
+    });
+
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
 
     if (email == "" || password == "") {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Fill all Fields ')),
+      setState(() {
+        isLoading = false;
+        errorText = 'Please fill all fields.';
+      });
+      return;
+    }
+
+    try {
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
       );
-    } else {
-      try {
-        UserCredential userCredential = await FirebaseAuth.instance
-            .signInWithEmailAndPassword(email: email, password: password);
-        if (userCredential.user != null) {
-          Navigator.popUntil(context, (route) => route.isFirst);
-          // Navigator.pushReplacement(
-          //     context,
-          //     CupertinoPageRoute(
-          //         builder: (context) => const AdminHomeScreen()));
-        }
-      } on FirebaseAuthException catch (ex) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$ex')),
+
+      if (userCredential.user != null) {
+        Navigator.popUntil(context, (route) => route.isFirst);
+        Navigator.pushReplacement(
+          context,
+          CupertinoPageRoute(
+            builder: (context) => const AdminHomeScreen(),
+          ),
         );
       }
+    } on FirebaseAuthException catch (ex) {
+      setState(() {
+        isLoading = false;
+        if (ex.code == 'user-not-found') {
+          errorText = 'User not found.';
+        } else if (ex.code == 'wrong-password') {
+          errorText = 'Wrong password.';
+        } else {
+          errorText = 'An error occurred. Please try again later.';
+        }
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    //double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Container(
-        color: const Color.fromARGB(255, 70, 63, 60),
-        child: Padding(
-          padding: const EdgeInsets.all(30.0),
-          child: Container(
-            color: const Color.fromARGB(255, 195, 162, 132),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: screenHeight * 0.1,
-                ),
-                const Text(
-                  " Admin",
-                  style: TextStyle(fontSize: 60, fontWeight: FontWeight.bold),
-                ),
-                const Text(
-                  " Login",
-                  style: TextStyle(fontSize: 60, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(
-                  height: screenHeight * 0.1,
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextFormField(
-                    controller: emailController,
-                    // style: const TextStyle(height: 30),
-                    cursorColor: const Color.fromARGB(255, 70, 63, 60),
-                    decoration: InputDecoration(
-                      labelText: 'Enter Gmail ',
-                      labelStyle: const TextStyle(
-                          color: Color.fromARGB(255, 70, 63, 60)),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                        borderSide:
-                            const BorderSide(width: 3, color: Colors.white),
-                      ),
-                      focusedBorder: const OutlineInputBorder(
-                        borderSide: BorderSide(
-                          width: 3,
-                          color: Color.fromARGB(255, 70, 63, 60),
-                        ),
-                      ),
-                    ),
+        color: Colors.white,
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: screenHeight * 0.1),
+            Text(
+              "Admin\nLogin",
+              style: TextStyle(
+                fontSize: 60,
+                fontWeight: FontWeight.bold,
+                color: Colors.brown.shade900,
+              ),
+            ),
+            SizedBox(height: screenHeight * 0.1),
+            TextFormField(
+              controller: emailController,
+              cursorColor: Colors.brown.shade900,
+              decoration: InputDecoration(
+                labelText: 'Enter Gmail',
+                labelStyle: TextStyle(color: Colors.brown.shade900),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    width: 3,
+                    color: Colors.brown.shade900,
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextFormField(
-                    controller: passwordController,
-                    // style: const TextStyle(height: 30),
-                    cursorColor: const Color.fromARGB(255, 70, 63, 60),
-                    decoration: InputDecoration(
-                      labelText: 'Enter Password',
-                      labelStyle: const TextStyle(
-                          color: Color.fromARGB(255, 70, 63, 60)),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                        borderSide:
-                            const BorderSide(width: 3, color: Colors.white),
-                      ),
-                      focusedBorder: const OutlineInputBorder(
-                        borderSide: BorderSide(
-                          width: 3,
-                          color: Color.fromARGB(255, 70, 63, 60),
-                        ),
-                      ),
-                    ),
+              ),
+            ),
+            SizedBox(height: 16),
+            TextFormField(
+              controller: passwordController,
+              cursorColor: Colors.brown.shade900,
+              obscureText: !passwordVisible,
+              decoration: InputDecoration(
+                labelText: 'Enter Password',
+                labelStyle: TextStyle(color: Colors.brown.shade900),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    width: 3,
+                    color: Colors.brown.shade900,
                   ),
                 ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Container(
-                    margin: const EdgeInsets.all(10),
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        login();
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //       builder: (context) => const AdminOtp()),
-                        // );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20.0, vertical: 7.0),
-                        backgroundColor: Colors.white,
-                        shape: const StadiumBorder(),
-                      ),
-                      child: const Text(
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    passwordVisible ? Icons.visibility : Icons.visibility_off,
+                    color: Colors.brown.shade900,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      passwordVisible = !passwordVisible;
+                    });
+                  },
+                ),
+              ),
+            ),
+            SizedBox(height: 24),
+            Align(
+              alignment: Alignment.center,
+              child: ElevatedButton(
+                onPressed: isLoading ? null : login,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20.0,
+                    vertical: 10.0,
+                  ),
+                  backgroundColor: Colors.brown.shade900,
+                  shape: StadiumBorder(),
+                ),
+                child: isLoading
+                    ? CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      )
+                    : Text(
                         "Login",
                         style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold),
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
+              ),
+            ),
+            SizedBox(height: 16),
+            if (errorText.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  errorText,
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 16,
                   ),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Login with Phone no?"),
-                    TextButton(
-                      child: const Text(
-                        'Login',
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: Colors.yellow,
-                        ),
-                      ),
-                      onPressed: () {
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //       builder: (context) => AdminPhoneNoLogin()),
-                        // );
-                      },
-                    )
-                  ],
+              ),
+            SizedBox(height: 16),
+            Center(
+              child: TextButton(
+                child: Text(
+                  "Don't have an account? Sign Up",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.brown.shade900,
+                  ),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Don't have account?"),
-                    TextButton(
-                      child: const Text(
-                        'Sign Up',
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: Colors.yellow,
-                        ),
-                      ),
-                      onPressed: () {
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //       builder: (context) => const AdminSignIn()),
-                        // );
-                      },
-                    )
-                  ],
-                ),
-              ],
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AdminSignIn()),
+                  );
+                },
+              ),
             ),
-          ),
+            Center(
+              child: TextButton(
+                child: Text(
+                  "Login as Dealer",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.brown.shade900,
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => UserGmailLogin()),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -1,4 +1,4 @@
-import 'package:doorapp2/user_gmail_login.dart';
+import 'package:doorapp2/auth/user_auth/user_gmail_login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -51,7 +51,7 @@ class _UserSignUpState extends State<UserSignUp> {
           children: [
             SizedBox(height: screenHeight * 0.1),
             Text(
-              "User\nSign Up",
+              "Dealer\nSign Up",
               style: TextStyle(
                 fontSize: 60,
                 fontWeight: FontWeight.bold,

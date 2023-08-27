@@ -1,4 +1,6 @@
-import 'package:doorapp2/user_signup.dart';
+import 'package:doorapp2/auth/admin_auth/admin_gmail_login.dart';
+import 'package:doorapp2/auth/user_auth/user_signup.dart';
+import 'package:doorapp2/dealer_homescreen/dealer_homescreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -28,8 +30,10 @@ class _UserGmailLoginState extends State<UserGmailLogin> {
             .signInWithEmailAndPassword(email: email, password: password);
         if (userCredential.user != null) {
           Navigator.popUntil(context, (route) => route.isFirst);
-          // Navigator.pushReplacement(context,
-          //     CupertinoPageRoute(builder: (context) => const UserHomeScreen()));
+          Navigator.pushReplacement(
+              context,
+              CupertinoPageRoute(
+                  builder: (context) => const DealerHomeScreen()));
         }
       } on FirebaseAuthException catch (ex) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -52,7 +56,7 @@ class _UserGmailLoginState extends State<UserGmailLogin> {
           children: [
             SizedBox(height: screenHeight * 0.1),
             Text(
-              "User\nLogin",
+              "Dealer\nLogin",
               style: TextStyle(
                 fontSize: 60,
                 fontWeight: FontWeight.bold,
@@ -127,6 +131,23 @@ class _UserGmailLoginState extends State<UserGmailLogin> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => UserSignUp()),
+                  );
+                },
+              ),
+            ),
+            Center(
+              child: TextButton(
+                child: Text(
+                  "Login as Admin",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.brown.shade900,
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AdminLogin()),
                   );
                 },
               ),
