@@ -1,3 +1,4 @@
+import 'package:doorapp2/admin_homescreen/admin_homescreen_part/admin_dealerList.dart';
 import 'package:doorapp2/admin_homescreen/admin_homescreen_part/admin_dealer_register.dart';
 import 'package:doorapp2/auth/admin_auth/admin_gmail_login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -13,7 +14,7 @@ class AdminHomeScreen extends StatefulWidget {
 
 List button = [
   'Dealer Register',
-  'Qr Generator',
+  'Dealer List',
   'Carpenter Details',
   'Leader Board',
   'Gift Request',
@@ -30,24 +31,26 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Log Out"),
-          content: Text("Are you sure you want to log out?"),
+          title: const Text("Log Out"),
+          content: const Text("Are you sure you want to log out?"),
           actions: [
             TextButton(
-              child: Text("Cancel"),
+              child: const Text("Cancel"),
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
               },
             ),
             TextButton(
-              child: Text("Log Out"),
+              child: const Text("Log Out"),
               onPressed: () async {
                 Navigator.of(context).pop(); // Close the dialog
                 await FirebaseAuth.instance.signOut();
+                // ignore: use_build_context_synchronously
                 Navigator.popUntil(context, (route) => route.isFirst);
+                // ignore: use_build_context_synchronously
                 Navigator.pushReplacement(
                   context,
-                  CupertinoPageRoute(builder: (context) => AdminLogin()),
+                  CupertinoPageRoute(builder: (context) => const AdminLogin()),
                 );
               },
             ),
@@ -93,12 +96,12 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                               ),
                             );
                           } else if (index == 1) {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) => QrGenerator(),
-                            //   ),
-                            // );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AdminDealerList(),
+                              ),
+                            );
                           } else if (index == 2) {
                             // Navigator.push(
                             //   context,

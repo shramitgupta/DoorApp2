@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doorapp2/admin_homescreen/admin_homescreen_part/state_list.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -27,6 +29,7 @@ class _DealerRegisterState extends State<DealerRegister> {
   String subCategValue = 'District';
   List<String> subCategList = [];
   String statusMessage = '';
+  int totalorder = 0;
   void signUp() async {
     setState(() {
       isLoading = true;
@@ -68,6 +71,9 @@ class _DealerRegisterState extends State<DealerRegister> {
           'aadharno': aadharno,
           'address': address,
           'pin': pin,
+          'state': mainCategValue,
+          'district': subCategValue,
+          'totalorder': totalorder,
         });
         clearFields();
         setState(() {
@@ -207,7 +213,7 @@ class _DealerRegisterState extends State<DealerRegister> {
       subCategList = WestBengal;
     }
 
-    print(value);
+    log(value.toString());
     setState(() {
       mainCategValue = value!;
       subCategValue = 'District';
@@ -241,7 +247,7 @@ class _DealerRegisterState extends State<DealerRegister> {
       ),
       body: Builder(
         builder: (context) {
-          return Container(
+          return SizedBox(
             height: double.infinity,
             width: double.infinity,
             child: Padding(
@@ -427,8 +433,8 @@ class _DealerRegisterState extends State<DealerRegister> {
                         items: maincateg.map<DropdownMenuItem<String>>((value) {
                           return DropdownMenuItem<String>(
                             value: value,
-                            child: Text(value),
                             enabled: !isLoading,
+                            child: Text(value),
                           );
                         }).toList(),
                         decoration: InputDecoration(
@@ -452,7 +458,7 @@ class _DealerRegisterState extends State<DealerRegister> {
                       child: DropdownButtonFormField<String>(
                         value: subCategValue,
                         onChanged: (String? value) {
-                          print(value);
+                          log(value.toString());
                           setState(() {
                             subCategValue = value!;
                           });
@@ -461,8 +467,8 @@ class _DealerRegisterState extends State<DealerRegister> {
                             subCategList.map<DropdownMenuItem<String>>((value) {
                           return DropdownMenuItem<String>(
                             value: value,
-                            child: Text(value),
                             enabled: !isLoading,
+                            child: Text(value),
                           );
                         }).toList(),
                         decoration: InputDecoration(

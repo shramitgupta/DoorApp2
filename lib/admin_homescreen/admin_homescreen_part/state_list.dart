@@ -30,6 +30,7 @@ List<String> maincateg = [
   'West Bengal'
 ];
 
+// ignore: non_constant_identifier_names
 List<String> AndhraPradesh = [
   'District',
   'Alluri Sitharama Raju',
@@ -60,6 +61,7 @@ List<String> AndhraPradesh = [
   'Y.S.R'
 ];
 
+// ignore: non_constant_identifier_names
 List<String> ArunachalPradesh = [
   'District',
   'ANJAW',
@@ -89,6 +91,7 @@ List<String> ArunachalPradesh = [
   'West Siang',
 ];
 
+// ignore: non_constant_identifier_names
 List<String> Assam = [
   'District',
   'Baksa',
@@ -124,6 +127,7 @@ List<String> Assam = [
   'West Karbi Anglong',
 ];
 
+// ignore: non_constant_identifier_names
 List<String> Bihar = [
   'District',
   'Araria',
@@ -166,6 +170,7 @@ List<String> Bihar = [
   'Vaishali',
 ];
 
+// ignore: non_constant_identifier_names
 List<String> Chhattisgarh = [
   'District',
   'Balod',
@@ -197,12 +202,14 @@ List<String> Chhattisgarh = [
   'Surguja',
 ];
 
+// ignore: non_constant_identifier_names
 List<String> Goa = [
   'District',
   'North Goa',
   'South Goa',
 ];
 
+// ignore: non_constant_identifier_names
 List<String> Gujarat = [
   'District',
   'Ahmedabad',
@@ -240,6 +247,7 @@ List<String> Gujarat = [
   'Valsad',
 ];
 
+// ignore: non_constant_identifier_names
 List<String> Haryana = [
   'District',
   'Ambala',
@@ -266,6 +274,7 @@ List<String> Haryana = [
   'Yamunanagar',
 ];
 
+// ignore: non_constant_identifier_names
 List<String> HimachalPradesh = [
   'District',
   'Bilaspur',
@@ -281,6 +290,7 @@ List<String> HimachalPradesh = [
   'Solan',
   'Una',
 ];
+// ignore: non_constant_identifier_names
 List<String> Jharkhand = [
   'District',
   'Bokaro',
@@ -308,6 +318,7 @@ List<String> Jharkhand = [
   'Simdega',
   'West Singhbhum',
 ];
+// ignore: non_constant_identifier_names
 List<String> Karnataka = [
   'District',
   'Bagalkot',
@@ -341,6 +352,7 @@ List<String> Karnataka = [
   'Uttara Kannada',
   'Yadgir',
 ];
+// ignore: non_constant_identifier_names
 List<String> Kerala = [
   'District',
   'Alappuzha',
@@ -358,6 +370,7 @@ List<String> Kerala = [
   'Thrissur',
   'Wayanad',
 ];
+// ignore: non_constant_identifier_names
 List<String> MadhyaPradesh = [
   'District',
   'Agar Malwa',
@@ -413,6 +426,7 @@ List<String> MadhyaPradesh = [
   'Vidisha',
   'West Nimar',
 ];
+// ignore: non_constant_identifier_names
 List<String> Maharashtra = [
   'District',
   'Ahmednagar',
@@ -452,6 +466,7 @@ List<String> Maharashtra = [
   'Washim',
   'Yavatmal',
 ];
+// ignore: non_constant_identifier_names
 List<String> Manipur = [
   'District',
   'Bishnupur',
@@ -464,6 +479,7 @@ List<String> Manipur = [
   'Churachandpur',
   'Tamenglong',
 ];
+// ignore: non_constant_identifier_names
 List<String> Meghalaya = [
   'District',
   'East Garo Hills',
@@ -474,6 +490,7 @@ List<String> Meghalaya = [
   'West Garo Hills',
   'West Khasi Hills',
 ];
+// ignore: non_constant_identifier_names
 List<String> Mizoram = [
   'District',
   'Aizawl',
@@ -485,6 +502,7 @@ List<String> Mizoram = [
   'Serchhip',
   'Champhai',
 ];
+// ignore: non_constant_identifier_names
 List<String> Nagaland = [
   'District',
   'Dimapur',
@@ -500,6 +518,7 @@ List<String> Nagaland = [
   'Zunheboto',
   'Noklak',
 ];
+// ignore: non_constant_identifier_names
 List<String> Orissa = [
   'District',
   'Angul',
@@ -533,6 +552,7 @@ List<String> Orissa = [
   'Subarnapur (Sonepur)',
   'Sundargarh',
 ];
+// ignore: non_constant_identifier_names
 List<String> Punjab = [
   'District',
   'Amritsar',
@@ -558,6 +578,7 @@ List<String> Punjab = [
   'Shahid Bhagat Singh Nagar',
   'Taran Taran',
 ];
+// ignore: non_constant_identifier_names
 List<String> Rajasthan = [
   'District',
   'Ajmer',
@@ -594,6 +615,7 @@ List<String> Rajasthan = [
   'Tonk',
   'Udaipur',
 ];
+// ignore: non_constant_identifier_names
 List<String> Sikkim = [
   'District',
   'East Sikkim',
@@ -601,6 +623,7 @@ List<String> Sikkim = [
   'South Sikkim',
   'West Sikkim',
 ];
+// ignore: non_constant_identifier_names
 List<String> TamilNadu = [
   'District',
   'Ariyalur',
@@ -637,6 +660,7 @@ List<String> TamilNadu = [
   'Viluppuram',
   'Virudhunagar',
 ];
+// ignore: non_constant_identifier_names
 List<String> Telangana = [
   'District',
   'Adilabad',
@@ -673,6 +697,7 @@ List<String> Telangana = [
   'Warangal Urban',
   'Yadadri Bhuvanagiri',
 ];
+// ignore: non_constant_identifier_names
 List<String> Tripura = [
   'District',
   'Dhalai',
@@ -680,6 +705,7 @@ List<String> Tripura = [
   'South Tripura',
   'West Tripura',
 ];
+// ignore: non_constant_identifier_names
 List<String> UttarPradesh = [
   'District',
   'Agra',
@@ -758,6 +784,7 @@ List<String> UttarPradesh = [
   'Amethi',
   'Bagpat',
 ];
+// ignore: non_constant_identifier_names
 List<String> Uttarakhand = [
   'District',
   'Almora',
@@ -774,6 +801,7 @@ List<String> Uttarakhand = [
   'Udham Singh Nagar',
   'Uttarkashi',
 ];
+// ignore: non_constant_identifier_names
 List<String> WestBengal = [
   'District',
   'Alipurduar',
