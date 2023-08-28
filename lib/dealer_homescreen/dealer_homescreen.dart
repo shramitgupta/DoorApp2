@@ -1,4 +1,7 @@
 import 'package:doorapp2/auth/user_auth/user_gmail_login.dart';
+import 'package:doorapp2/dealer_homescreen/dealer_homescreen_part/dealer_order.dart';
+import 'package:doorapp2/dealer_homescreen/dealer_homescreen_part/dealer_order_status.dart';
+import 'package:doorapp2/dealer_homescreen/dealer_homescreen_part/dealer_pofile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -10,10 +13,11 @@ class DealerHomeScreen extends StatefulWidget {
   State<DealerHomeScreen> createState() => _DealerHomeScreenState();
 }
 
+String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
 List button = [
   'Profile Screen',
-  'Qr Scanner',
-  'Total Points',
+  'Place Order',
+  'Order Status',
   'Leader Board',
   'Gift Details',
   'Redeem Status',
@@ -86,26 +90,26 @@ class _DealerHomeScreenState extends State<DealerHomeScreen> {
                       return ListTile(
                         onTap: () {
                           if (index == 0) {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) => const UserProfileScreen(),
-                            //   ),
-                            // );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const DealerProfile(),
+                              ),
+                            );
                           } else if (index == 1) {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) => const UserQrScanner(),
-                            //   ),
-                            // );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const PlaceOrder(),
+                              ),
+                            );
                           } else if (index == 2) {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) => const UserTotalPoints(),
-                            //   ),
-                            // );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const DealerOrderStatus(),
+                              ),
+                            );
                           } else if (index == 3) {
                             // Navigator.push(
                             //   context,

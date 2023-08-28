@@ -1,5 +1,7 @@
 import 'package:doorapp2/admin_homescreen/admin_homescreen_part/admin_dealerList.dart';
 import 'package:doorapp2/admin_homescreen/admin_homescreen_part/admin_dealer_register.dart';
+import 'package:doorapp2/admin_homescreen/admin_homescreen_part/admin_orders.dart';
+import 'package:doorapp2/admin_homescreen/admin_homescreen_part/admin_totalorders.dart';
 import 'package:doorapp2/auth/admin_auth/admin_gmail_login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -15,8 +17,8 @@ class AdminHomeScreen extends StatefulWidget {
 List button = [
   'Dealer Register',
   'Dealer List',
-  'Carpenter Details',
-  'Leader Board',
+  'Total Order',
+  'Orders',
   'Gift Request',
   'What to Send',
   'Total Gifts Sent',
@@ -103,20 +105,19 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                               ),
                             );
                           } else if (index == 2) {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) => const CarpenterDetails(),
-                            //   ),
-                            // );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const TotalOrders(),
+                              ),
+                            );
                           } else if (index == 3) {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) =>
-                            //         const CarpenterLeaderBoard(),
-                            //   ),
-                            // );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => AdminOrders(),
+                              ),
+                            );
                           } else if (index == 4) {
                             // Navigator.push(
                             //   context,

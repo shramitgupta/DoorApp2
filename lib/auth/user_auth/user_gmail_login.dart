@@ -22,7 +22,7 @@ class _UserGmailLoginState extends State<UserGmailLogin> {
   Future<bool> verifyDealerEmail(String enteredEmail) async {
     try {
       final dealerSnapshot = await FirebaseFirestore.instance
-          .collection('dealers')
+          .collection('dealer')
           .where('email', isEqualTo: enteredEmail)
           .get();
       return dealerSnapshot.docs.isNotEmpty;

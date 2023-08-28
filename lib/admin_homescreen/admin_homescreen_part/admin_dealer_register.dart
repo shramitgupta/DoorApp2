@@ -30,6 +30,7 @@ class _DealerRegisterState extends State<DealerRegister> {
   List<String> subCategList = [];
   String statusMessage = '';
   int totalorder = 0;
+
   void signUp() async {
     setState(() {
       isLoading = true;
@@ -60,8 +61,9 @@ class _DealerRegisterState extends State<DealerRegister> {
           .createUserWithEmailAndPassword(email: email, password: password);
 
       if (userCredential.user != null) {
-        // Add user's email to Firestore collection
-        await FirebaseFirestore.instance.collection('dealer').add({
+        String userId = userCredential.user!.uid; // Get the user UID
+        // Add user's data to Firestore collection with the same UID as document ID
+        await FirebaseFirestore.instance.collection('dealer').doc(userId).set({
           'email': email,
           'name': name,
           'gstno': gstno,
@@ -75,11 +77,13 @@ class _DealerRegisterState extends State<DealerRegister> {
           'district': subCategValue,
           'totalorder': totalorder,
         });
+
         clearFields();
         setState(() {
           isLoading = false;
           statusMessage = 'Successfully signed up!';
         });
+
         Fluttertoast.showToast(
           msg: "Registered successfully!",
           toastLength: Toast.LENGTH_LONG,
