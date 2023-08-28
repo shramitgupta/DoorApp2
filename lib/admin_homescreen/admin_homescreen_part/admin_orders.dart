@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:photo_view/photo_view.dart';
@@ -39,6 +41,7 @@ class _AdminOrdersState extends State<AdminOrders> {
             itemCount: orders.length,
             itemBuilder: (context, index) {
               final order = orders[index];
+              log(order.toString());
               final data = order.data() as Map<String, dynamic>;
               final img = data['orderpic'];
               final companyName =
@@ -52,6 +55,7 @@ class _AdminOrdersState extends State<AdminOrders> {
                 child: Card(
                   elevation: 2,
                   child: OrderTile(
+                    id: order.id, // Get the document ID
                     orderPicUrl: img,
                     companyName: companyName,
                     dealerEmail: dealerEmail,
@@ -70,7 +74,9 @@ class OrderTile extends StatefulWidget {
   final String companyName;
   final String dealerEmail;
   final String orderPicUrl;
+  final String id;
   OrderTile({
+    required this.id,
     required this.orderPicUrl,
     required this.companyName,
     required this.dealerEmail,
@@ -101,8 +107,10 @@ class _OrderTileState extends State<OrderTile> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          ImageViewerPage(imageUrl: widget.orderPicUrl),
+                      builder: (context) => ImageViewerPage(
+                        imageUrl: widget.orderPicUrl,
+                        orderId: widget.id,
+                      ),
                     ),
                   );
                 },
@@ -123,8 +131,12 @@ class _OrderTileState extends State<OrderTile> {
 
 class ImageViewerPage extends StatelessWidget {
   final String imageUrl;
+  final String orderId;
 
-  ImageViewerPage({required this.imageUrl});
+  ImageViewerPage({
+    required this.imageUrl,
+    required this.orderId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -141,22 +153,77 @@ class ImageViewerPage extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: Center(
-        child: PhotoViewGallery.builder(
-          itemCount: 1, // Display only one image
-          builder: (context, index) {
-            return PhotoViewGalleryPageOptions(
-              imageProvider: NetworkImage(imageUrl),
-              minScale: PhotoViewComputedScale.contained * 0.8,
-              maxScale: PhotoViewComputedScale.covered * 2,
-            );
-          },
-          backgroundDecoration: BoxDecoration(
-            color: Colors.black,
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Center(
+              child: PhotoViewGallery.builder(
+                itemCount: 1,
+                builder: (context, index) {
+                  return PhotoViewGalleryPageOptions(
+                    imageProvider: NetworkImage(imageUrl),
+                    minScale: PhotoViewComputedScale.contained * 0.8,
+                    maxScale: PhotoViewComputedScale.covered * 2,
+                  );
+                },
+                backgroundDecoration: BoxDecoration(
+                  color: Colors.black,
+                ),
+                pageController: PageController(),
+              ),
+            ),
           ),
-          pageController: PageController(),
-        ),
+          SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  _updateOrderStatus(context, 'approved'); // Pass context here
+                },
+                child: Text('Approve'),
+              ),
+              SizedBox(width: 16),
+              ElevatedButton(
+                onPressed: () {
+                  _updateOrderStatus(context, 'rejected'); // Pass context here
+                },
+                child: Text('Reject'),
+              ),
+            ],
+          ),
+          SizedBox(height: 16),
+        ],
       ),
     );
   }
+
+  void _updateOrderStatus(BuildContext context, String status) async {
+    try {
+      final ordersCollection = FirebaseFirestore.instance.collection("orders");
+      await ordersCollection.doc(orderId).update({'status': status});
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Order $status successfully.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error updating order status.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+}
+
+void main() {
+  runApp(MaterialApp(
+    home: AdminOrders(),
+  ));
 }
