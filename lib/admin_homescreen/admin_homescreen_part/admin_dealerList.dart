@@ -12,16 +12,22 @@ class AdminDealerList extends StatefulWidget {
 class _AdminDealerListState extends State<AdminDealerList> {
   late Future<int> _totalUsersCountFuture;
   bool _showSearchBar = false;
+  bool _showSearchPincode = false; // New state variable for pincode search
   String _searchQuery = '';
+  String _pincodeSearchQuery = ''; // New state variable for pincode search
   late Timer _searchTimer;
   late Stream<QuerySnapshot> _searchStream;
-
+  late Stream<QuerySnapshot>
+      _pincodeSearchStream; // New stream for pincode search
   @override
   void initState() {
     super.initState();
     _totalUsersCountFuture = _getTotalUsersCount();
     _searchTimer = Timer(Duration(milliseconds: 500), () {});
     _searchStream = FirebaseFirestore.instance.collection("dealer").snapshots();
+    _pincodeSearchStream = FirebaseFirestore.instance
+        .collection("dealer")
+        .snapshots(); // Initialize _pincodeSearchStream
   }
 
   void _startSearchTimer() {
@@ -38,6 +44,26 @@ class _AdminDealerListState extends State<AdminDealerList> {
           _searchStream = FirebaseFirestore.instance
               .collection("dealer")
               .where("companyname", isGreaterThanOrEqualTo: _searchQuery)
+              .snapshots();
+        }
+      });
+    });
+  }
+
+  void _startPincodeSearch(String pincode) {
+    if (_searchTimer.isActive) {
+      _searchTimer.cancel();
+    }
+    _searchTimer = Timer(Duration(milliseconds: 500), () {
+      setState(() {
+        _pincodeSearchQuery = pincode;
+        if (_pincodeSearchQuery.isEmpty) {
+          _pincodeSearchStream =
+              FirebaseFirestore.instance.collection("dealer").snapshots();
+        } else {
+          _pincodeSearchStream = FirebaseFirestore.instance
+              .collection("dealer")
+              .where("pin", isEqualTo: _pincodeSearchQuery)
               .snapshots();
         }
       });
@@ -93,21 +119,33 @@ class _AdminDealerListState extends State<AdminDealerList> {
               ),
               PopupMenuItem(
                 value: '2',
-                child: Text('Search'),
+                child: Text('Company Name Search'),
+              ),
+              PopupMenuItem(
+                value: '3',
+                child: Text('Search Pincode'),
               ),
             ],
             onSelected: (value) {
-              if (value == '1') {
+              if (value == '0') {
                 setState(() {
                   _showSearchBar = false;
+                  _showSearchPincode = false;
                 });
               } else if (value == '1') {
                 setState(() {
                   _showSearchBar = false;
+                  _showSearchPincode = false;
                 });
               } else if (value == '2') {
                 setState(() {
                   _showSearchBar = true;
+                  _showSearchPincode = false;
+                });
+              } else if (value == '3') {
+                setState(() {
+                  _showSearchBar = false;
+                  _showSearchPincode = true;
                 });
               }
             },
@@ -198,42 +236,31 @@ class _AdminDealerListState extends State<AdminDealerList> {
                   ),
                 ],
               )
-            : FutureBuilder<int>(
-                future: _totalUsersCountFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(
-                      child: CircularProgressIndicator(),
-                    );
-                  } else if (snapshot.hasError) {
-                    return Center(
-                      child: Text('Error fetching total users count.'),
-                    );
-                  }
-
-                  final totalUsersCount = snapshot.data ?? 0;
-
-                  return Column(
+            : _showSearchPincode
+                ? Column(
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(16.0),
-                        child: AnimatedDefaultTextStyle(
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.brown.shade900,
+                        child: TextField(
+                          onChanged: (value) {
+                            _startPincodeSearch(value);
+                          },
+                          decoration: InputDecoration(
+                            hintText: 'Search Pincode...',
+                            contentPadding: EdgeInsets.symmetric(vertical: 8),
+                            prefixIcon: Icon(Icons.search),
+                            suffixIcon: IconButton(
+                              icon: Icon(Icons.clear),
+                              onPressed: () {
+                                _startPincodeSearch('');
+                              },
+                            ),
                           ),
-                          duration: Duration(milliseconds: 500),
-                          curve: Curves.easeInOut,
-                          child: Text('Total Users: $totalUsersCount'),
                         ),
                       ),
                       Expanded(
                         child: StreamBuilder<QuerySnapshot>(
-                          stream: FirebaseFirestore.instance
-                              .collection("dealer")
-                              .orderBy("totalorder", descending: true)
-                              .snapshots(),
+                          stream: _pincodeSearchStream,
                           builder: (context, snapshot) {
                             if (snapshot.hasError) {
                               return Center(
@@ -286,9 +313,100 @@ class _AdminDealerListState extends State<AdminDealerList> {
                         ),
                       ),
                     ],
-                  );
-                },
-              ),
+                  )
+                : FutureBuilder<int>(
+                    future: _totalUsersCountFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      } else if (snapshot.hasError) {
+                        return Center(
+                          child: Text('Error fetching total users count.'),
+                        );
+                      }
+
+                      final totalUsersCount = snapshot.data ?? 0;
+
+                      return Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: AnimatedDefaultTextStyle(
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.brown.shade900,
+                              ),
+                              duration: Duration(milliseconds: 500),
+                              curve: Curves.easeInOut,
+                              child: Text('Total Users: $totalUsersCount'),
+                            ),
+                          ),
+                          Expanded(
+                            child: StreamBuilder<QuerySnapshot>(
+                              stream: FirebaseFirestore.instance
+                                  .collection("dealer")
+                                  .orderBy("totalorder", descending: true)
+                                  .snapshots(),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasError) {
+                                  return Center(
+                                    child: Text('Error fetching data.'),
+                                  );
+                                }
+
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                }
+
+                                final List<DocumentSnapshot> documents =
+                                    snapshot.data!.docs;
+                                return ListView.builder(
+                                  itemCount: documents.length,
+                                  itemBuilder: (context, index) {
+                                    final docData = documents[index].data()
+                                        as Map<String, dynamic>;
+                                    final title = docData['companyname'] ??
+                                        'No Company Name';
+                                    final subtitle =
+                                        docData['email'] ?? 'No Email';
+                                    final ranking = (index + 1).toString();
+                                    final totalOrderPoints =
+                                        docData['totalorder'] ?? 0;
+                                    return Card(
+                                      elevation: 6,
+                                      margin: const EdgeInsets.all(10),
+                                      child: ListTile(
+                                        leading: CircleAvatar(
+                                          backgroundColor:
+                                              Colors.brown.shade900,
+                                          child: Text(ranking),
+                                        ),
+                                        title: Text(title),
+                                        subtitle: Text(subtitle),
+                                        trailing: Text(
+                                          '$totalOrderPoints',
+                                          style: TextStyle(
+                                            color: Colors.brown.shade900,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
       ),
     );
   }
