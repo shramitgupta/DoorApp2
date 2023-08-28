@@ -84,6 +84,10 @@ class _AdminDealerListState extends State<AdminDealerList> {
           PopupMenuButton<String>(
             itemBuilder: (context) => [
               PopupMenuItem(
+                value: '0',
+                child: Text('Total Users'),
+              ),
+              PopupMenuItem(
                 value: '1',
                 child: Text('Filter for location'),
               ),
@@ -94,6 +98,10 @@ class _AdminDealerListState extends State<AdminDealerList> {
             ],
             onSelected: (value) {
               if (value == '1') {
+                setState(() {
+                  _showSearchBar = false;
+                });
+              } else if (value == '1') {
                 setState(() {
                   _showSearchBar = false;
                 });
