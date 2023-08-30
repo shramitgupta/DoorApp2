@@ -5,6 +5,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 
+void main() {
+  runApp(MaterialApp(home: AdminOrders()));
+}
+
 class AdminOrders extends StatefulWidget {
   const AdminOrders({Key? key}) : super(key: key);
 
@@ -88,6 +92,53 @@ class OrderTile extends StatefulWidget {
 
 class _OrderTileState extends State<OrderTile> {
   bool _isExpanded = false;
+  String _orderStatus = 'Not Approved'; // Default status
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchOrderStatus(); // Fetch order status when the widget is initialized
+  }
+
+  void _fetchOrderStatus() async {
+    try {
+      final orderSnapshot = await FirebaseFirestore.instance
+          .collection("orders")
+          .doc(widget.id)
+          .get();
+
+      setState(() {
+        _orderStatus = orderSnapshot.get('status') ?? 'Not Approved';
+      });
+    } catch (e) {
+      print('Error fetching order status: $e');
+    }
+  }
+
+  void _updateOrderStatus(BuildContext context, String status) async {
+    try {
+      final ordersCollection = FirebaseFirestore.instance.collection("orders");
+      await ordersCollection.doc(widget.id).update({'status': status});
+
+      setState(() {
+        _orderStatus = status;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Order $status successfully.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error updating order status.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -101,20 +152,95 @@ class _OrderTileState extends State<OrderTile> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ListTile(
-                title: Text('View Attachment'),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ImageViewerPage(
-                        imageUrl: widget.orderPicUrl,
-                        orderId: widget.id,
-                      ),
+              Row(
+                children: [
+                  Expanded(
+                    child: ListTile(
+                      title: Text('View Attachment'),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ImageViewerPage(
+                              imageUrl: widget.orderPicUrl,
+                              orderId: widget.id,
+                              orderStatus: _orderStatus,
+                              updateOrderStatus: _updateOrderStatus,
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
+                  ),
+                ],
               ),
+              if (_orderStatus == 'Not Approved')
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        _updateOrderStatus(context, 'Approved');
+                      },
+                      child: Text('Approve'),
+                    ),
+                    SizedBox(width: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        _updateOrderStatus(context, 'rejected');
+                      },
+                      child: Text('Reject'),
+                    ),
+                  ],
+                ),
+              if (_orderStatus == 'Approved')
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        _updateOrderStatus(context, 'Sizing Done');
+                      },
+                      child: Text('Sizing Done'),
+                    ),
+                  ],
+                ),
+              if (_orderStatus == 'Sizing Done')
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        _updateOrderStatus(context, 'Posting Done');
+                      },
+                      child: Text('Posting Done'),
+                    ),
+                  ],
+                ),
+              if (_orderStatus == 'Posting Done')
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        _updateOrderStatus(context, 'Packing Done');
+                      },
+                      child: Text('Packing Done'),
+                    ),
+                  ],
+                ),
+              if (_orderStatus == 'Packing Done')
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        _updateOrderStatus(context, 'Dispatched');
+                      },
+                      child: Text('Dispatched'),
+                    ),
+                  ],
+                ),
               // Add more information or actions here
             ],
           ),
@@ -132,10 +258,14 @@ class _OrderTileState extends State<OrderTile> {
 class ImageViewerPage extends StatelessWidget {
   final String imageUrl;
   final String orderId;
+  final String orderStatus;
+  final Function(BuildContext, String) updateOrderStatus;
 
   ImageViewerPage({
     required this.imageUrl,
     required this.orderId,
+    required this.orderStatus,
+    required this.updateOrderStatus,
   });
 
   @override
@@ -175,55 +305,75 @@ class ImageViewerPage extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  _updateOrderStatus(context, 'approved'); // Pass context here
-                },
-                child: Text('Approve'),
-              ),
-              SizedBox(width: 16),
-              ElevatedButton(
-                onPressed: () {
-                  _updateOrderStatus(context, 'rejected'); // Pass context here
-                },
-                child: Text('Reject'),
-              ),
-            ],
-          ),
-          SizedBox(height: 16),
+          if (orderStatus == 'Not Approved')
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    updateOrderStatus(context, 'approved');
+                  },
+                  child: Text('Approve'),
+                ),
+                SizedBox(width: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    updateOrderStatus(context, 'rejected');
+                  },
+                  child: Text('Reject'),
+                ),
+              ],
+            ),
+          if (orderStatus == 'Approved')
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    updateOrderStatus(context, 'sizing done');
+                  },
+                  child: Text('Sizing Done'),
+                ),
+              ],
+            ),
+          if (orderStatus == 'Sizing Done')
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    updateOrderStatus(context, 'posting done');
+                  },
+                  child: Text('Posting Done'),
+                ),
+              ],
+            ),
+          if (orderStatus == 'Posting Done')
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    updateOrderStatus(context, 'packing done');
+                  },
+                  child: Text('Packing Done'),
+                ),
+              ],
+            ),
+          if (orderStatus == 'Packing Done')
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    updateOrderStatus(context, 'dispatched');
+                  },
+                  child: Text('Dispatched'),
+                ),
+              ],
+            ),
         ],
       ),
     );
   }
-
-  void _updateOrderStatus(BuildContext context, String status) async {
-    try {
-      final ordersCollection = FirebaseFirestore.instance.collection("orders");
-      await ordersCollection.doc(orderId).update({'status': status});
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Order $status successfully.'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error updating order status.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-}
-
-void main() {
-  runApp(MaterialApp(
-    home: AdminOrders(),
-  ));
 }
