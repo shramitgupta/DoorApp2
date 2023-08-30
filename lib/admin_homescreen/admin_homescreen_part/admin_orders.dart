@@ -112,27 +112,56 @@ class _OrderTileState extends State<OrderTile> {
   }
 
   void _updateOrderStatus(BuildContext context, String status) async {
-    try {
-      final ordersCollection = FirebaseFirestore.instance.collection("orders");
-      await ordersCollection.doc(widget.id).update({'status': status});
+    // Show a confirmation alert dialog
+    bool shouldUpdate = await showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text('Confirmation'),
+          content: Text(
+              'Are you sure you want to update the order status to $status?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(false); // Cancel the update
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(true); // Confirm the update
+              },
+              child: Text('Confirm'),
+            ),
+          ],
+        );
+      },
+    );
 
-      setState(() {
-        _orderStatus = status;
-      });
+    if (shouldUpdate == true) {
+      try {
+        final ordersCollection =
+            FirebaseFirestore.instance.collection("orders");
+        await ordersCollection.doc(widget.id).update({'status': status});
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Order $status successfully.'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error updating order status.'),
-          backgroundColor: Colors.red,
-        ),
-      );
+        setState(() {
+          _orderStatus = status;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Order $status successfully.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error updating order status.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
