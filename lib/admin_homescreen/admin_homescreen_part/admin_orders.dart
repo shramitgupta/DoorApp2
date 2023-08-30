@@ -5,10 +5,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 
-void main() {
-  runApp(MaterialApp(home: AdminOrders()));
-}
-
 class AdminOrders extends StatefulWidget {
   const AdminOrders({Key? key}) : super(key: key);
 
@@ -182,7 +178,7 @@ class _OrderTileState extends State<OrderTile> {
                       onPressed: () {
                         _updateOrderStatus(context, 'Approved');
                       },
-                      child: Text('Approve'),
+                      child: Text('Approved'),
                     ),
                     SizedBox(width: 16),
                     ElevatedButton(
@@ -305,73 +301,6 @@ class ImageViewerPage extends StatelessWidget {
               ),
             ),
           ),
-          if (orderStatus == 'Not Approved')
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    updateOrderStatus(context, 'approved');
-                  },
-                  child: Text('Approve'),
-                ),
-                SizedBox(width: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    updateOrderStatus(context, 'rejected');
-                  },
-                  child: Text('Reject'),
-                ),
-              ],
-            ),
-          if (orderStatus == 'Approved')
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    updateOrderStatus(context, 'sizing done');
-                  },
-                  child: Text('Sizing Done'),
-                ),
-              ],
-            ),
-          if (orderStatus == 'Sizing Done')
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    updateOrderStatus(context, 'posting done');
-                  },
-                  child: Text('Posting Done'),
-                ),
-              ],
-            ),
-          if (orderStatus == 'Posting Done')
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    updateOrderStatus(context, 'packing done');
-                  },
-                  child: Text('Packing Done'),
-                ),
-              ],
-            ),
-          if (orderStatus == 'Packing Done')
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    updateOrderStatus(context, 'dispatched');
-                  },
-                  child: Text('Dispatched'),
-                ),
-              ],
-            ),
         ],
       ),
     );
