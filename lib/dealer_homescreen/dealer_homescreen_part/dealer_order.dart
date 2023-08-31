@@ -17,6 +17,7 @@ class PlaceOrder extends StatefulWidget {
 class _PlaceOrderState extends State<PlaceOrder> {
   File? orderpic;
   String status = 'Not Approved';
+
   Future<void> _getImageFromSource(ImageSource source) async {
     XFile? selectedImage = await ImagePicker().pickImage(source: source);
 
@@ -111,11 +112,11 @@ class _PlaceOrderState extends State<PlaceOrder> {
           .collection("dealer")
           .doc(userId)
           .get();
-      log(userId.toString());
-      log(dealerSnapshot.data().toString());
 
       String companyname = dealerSnapshot['companyname'];
       String dealerEmail = dealerSnapshot['email'];
+
+      Timestamp currentTime = Timestamp.now(); // Current time
 
       Map<String, dynamic> orderData = {
         "status": status,
@@ -123,6 +124,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
         "userId": userId,
         "companyName": companyname,
         "dealerEmail": dealerEmail,
+        "ordertime": currentTime, // Add timestamp field
       };
       FirebaseFirestore.instance.collection("orders").add(orderData);
 
@@ -134,7 +136,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
       Navigator.pop(context); // Hide the loading dialog
       showSuccessDialog(); // Show the success dialog
     } else {
-      log('fill data');
+      log('Fill in data');
       setState(() {
         isUploading = false;
       });

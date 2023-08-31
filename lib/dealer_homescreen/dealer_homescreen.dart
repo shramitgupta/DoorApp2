@@ -68,7 +68,7 @@ class _DealerHomeScreenState extends State<DealerHomeScreen> {
       appBar: AppBar(
         backgroundColor: Colors.brown.shade900,
         title: const Text(
-          'CARPENTER HOME',
+          'DEALER HOME',
           style: TextStyle(
             fontSize: 27,
             fontWeight: FontWeight.bold,

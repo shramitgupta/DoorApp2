@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart'; // Import for formatting timestamps
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 
@@ -29,7 +30,11 @@ class _AdminOrdersState extends State<AdminOrders> {
         centerTitle: true,
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection("orders").snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection("orders")
+            .orderBy('ordertime',
+                descending: true) // Order by ordertime in descending order
+            .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return Center(child: CircularProgressIndicator());
@@ -48,6 +53,7 @@ class _AdminOrdersState extends State<AdminOrders> {
                   data['companyName'] as String? ?? 'Unknown Company';
               final dealerEmail =
                   data['dealerEmail'] as String? ?? 'Unknown Email';
+              final orderTime = data['ordertime'] as Timestamp?; // Order time
 
               return Padding(
                 padding:
@@ -55,10 +61,11 @@ class _AdminOrdersState extends State<AdminOrders> {
                 child: Card(
                   elevation: 2,
                   child: OrderTile(
-                    id: order.id, // Get the document ID
+                    id: order.id,
                     orderPicUrl: img,
                     companyName: companyName,
                     dealerEmail: dealerEmail,
+                    orderTime: orderTime,
                   ),
                 ),
               );
@@ -75,11 +82,13 @@ class OrderTile extends StatefulWidget {
   final String dealerEmail;
   final String orderPicUrl;
   final String id;
+  final Timestamp? orderTime;
   OrderTile({
     required this.id,
     required this.orderPicUrl,
     required this.companyName,
     required this.dealerEmail,
+    required this.orderTime,
   });
 
   @override
@@ -169,7 +178,49 @@ class _OrderTileState extends State<OrderTile> {
   Widget build(BuildContext context) {
     return ExpansionTile(
       title: Text(widget.companyName),
-      subtitle: Text(widget.dealerEmail),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.email,
+                color: Colors.grey,
+                size: 18,
+              ),
+              SizedBox(width: 4),
+              Text(
+                widget.dealerEmail,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 4),
+          Row(
+            children: [
+              Icon(
+                Icons.access_time,
+                color: Colors.grey,
+                size: 18,
+              ),
+              SizedBox(width: 4),
+              Text(
+                // Format the order time using DateFormat
+                widget.orderTime != null
+                    ? 'Order Time: ${DateFormat('dd-MM-yyyy hh:mm a').format(widget.orderTime!.toDate())}'
+                    : 'Order Time: N/A',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
       trailing: Icon(_isExpanded ? Icons.expand_less : Icons.expand_more),
       children: [
         Padding(
