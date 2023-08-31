@@ -14,6 +14,8 @@ class AdminOrders extends StatefulWidget {
 }
 
 class _AdminOrdersState extends State<AdminOrders> {
+  String _selectedOrderStatus = 'Not Approved'; // Default status
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,12 +30,46 @@ class _AdminOrdersState extends State<AdminOrders> {
           ),
         ),
         centerTitle: true,
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (status) {
+              setState(() {
+                _selectedOrderStatus = status;
+              });
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'Not Approved',
+                child: Text('New Orders'),
+              ),
+              PopupMenuItem(
+                value: 'Approved',
+                child: Text('Approved Orders'),
+              ),
+              PopupMenuItem(
+                value: 'Sizing Done',
+                child: Text('Sizing'),
+              ),
+              PopupMenuItem(
+                value: 'Posting Done',
+                child: Text('Posting'),
+              ),
+              PopupMenuItem(
+                value: 'Packing Done',
+                child: Text('Packing'),
+              ),
+              PopupMenuItem(
+                value: 'Dispatched',
+                child: Text('Dispatch'),
+              ),
+            ],
+          ),
+        ],
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection("orders")
-            .orderBy('ordertime',
-                descending: true) // Order by ordertime in descending order
+            .orderBy('ordertime', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
@@ -42,10 +78,15 @@ class _AdminOrdersState extends State<AdminOrders> {
 
           final orders = snapshot.data!.docs;
 
+          final filteredOrders = orders.where((order) {
+            final orderStatus = order['status'] as String? ?? '';
+            return orderStatus == _selectedOrderStatus;
+          }).toList();
+
           return ListView.builder(
-            itemCount: orders.length,
+            itemCount: filteredOrders.length,
             itemBuilder: (context, index) {
-              final order = orders[index];
+              final order = filteredOrders[index];
               log(order.toString());
               final data = order.data() as Map<String, dynamic>;
               final img = data['orderpic'];

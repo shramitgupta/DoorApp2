@@ -17,6 +17,13 @@ class PlaceOrder extends StatefulWidget {
 class _PlaceOrderState extends State<PlaceOrder> {
   File? orderpic;
   String status = 'Not Approved';
+  String approvedtime = 'N/A';
+  String sizingtime = 'N/A';
+  String postingtime = 'N/A';
+  String packingtime = 'N/A';
+  String dispatchtime = 'N/A';
+  String bilty = 'N/A';
+  String bill = 'N/A';
 
   Future<void> _getImageFromSource(ImageSource source) async {
     XFile? selectedImage = await ImagePicker().pickImage(source: source);
@@ -125,6 +132,13 @@ class _PlaceOrderState extends State<PlaceOrder> {
         "companyName": companyname,
         "dealerEmail": dealerEmail,
         "ordertime": currentTime, // Add timestamp field
+        "approvedtime": approvedtime,
+        "sizingtime": sizingtime,
+        "postingtime": postingtime,
+        "packingtime": packingtime,
+        "dispatchtime": dispatchtime,
+        "bilty": bilty,
+        "bill": bill,
       };
       FirebaseFirestore.instance.collection("orders").add(orderData);
 
