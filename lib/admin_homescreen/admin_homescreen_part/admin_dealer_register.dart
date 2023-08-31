@@ -128,7 +128,7 @@ class _DealerRegisterState extends State<DealerRegister> {
   }
 
   bool areAllFieldsFilled() {
-    return gstController.text.isNotEmpty &&
+    var a = gstController.text.isNotEmpty &&
         cnoController.text.isNotEmpty &&
         companynameController.text.isNotEmpty &&
         pannoController.text.isNotEmpty &&
@@ -144,7 +144,26 @@ class _DealerRegisterState extends State<DealerRegister> {
         (cmaritalstatus != 'Married' ||
             sanniversarydateController!.text.isNotEmpty) &&
         sprofilepic != null &&
-        isStateDistrictSelected(); // Check if state and district are selected
+        isStateDistrictSelected();
+    log(gstController.text.isNotEmpty.toString() +
+        cnoController.text.isNotEmpty.toString() +
+        companynameController.text.isNotEmpty.toString() +
+        pannoController.text.isNotEmpty.toString() +
+        aadharnoController.text.isNotEmpty.toString() +
+        pinController.text.isNotEmpty.toString() +
+        emailController.text.isNotEmpty.toString() +
+        passController.text.isNotEmpty.toString() +
+        snameController.text.isNotEmpty.toString() +
+        spnoController.text.isNotEmpty.toString() +
+        saddressController.text.isNotEmpty.toString() +
+        sageController.text.isNotEmpty.toString() +
+        sdobController.text.isNotEmpty.toString() +
+        (cmaritalstatus != 'Married' ||
+                sanniversarydateController!.text.isNotEmpty)
+            .toString() +
+        (sprofilepic != null).toString() +
+        isStateDistrictSelected().toString());
+    return a; // Check if state and district are selected
   }
 
   String getCurrentUserId() {
@@ -303,6 +322,7 @@ class _DealerRegisterState extends State<DealerRegister> {
             "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
       });
     }
+    setState(() {});
   }
 
   Future<void> _selectAnniversaryDate(BuildContext context) async {
@@ -902,6 +922,9 @@ class _DealerRegisterState extends State<DealerRegister> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: TextFormField(
+                      onChanged: (value) {
+                        setState(() {});
+                      },
                       controller: passController,
                       enabled:
                           !isLoading, // Disable the field when isLoading is true
@@ -919,6 +942,20 @@ class _DealerRegisterState extends State<DealerRegister> {
                             width: 3,
                             color: Colors.brown.shade900,
                           ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      margin: const EdgeInsets.all(10),
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: areAllFieldsFilled,
+                        child: const Text(
+                          "Register",
+                          style: TextStyle(color: Colors.white, fontSize: 18),
                         ),
                       ),
                     ),

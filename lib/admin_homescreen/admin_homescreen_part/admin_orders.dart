@@ -1,8 +1,10 @@
 import 'dart:developer';
-
+import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart'; // Import for formatting timestamps
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 
@@ -13,8 +15,30 @@ class AdminOrders extends StatefulWidget {
   State<AdminOrders> createState() => _AdminOrdersState();
 }
 
-class _AdminOrdersState extends State<AdminOrders> {
-  String _selectedOrderStatus = 'Not Approved'; // Default status
+class _AdminOrdersState extends State<AdminOrders>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  String _selectedOrderStatus = 'Not Approved';
+  final tabStatuses = [
+    'Not Approved',
+    'Approved',
+    'Sizing Done',
+    'Posting Done',
+    'Packing Done',
+    'Dispatched',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 6, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,91 +54,83 @@ class _AdminOrdersState extends State<AdminOrders> {
           ),
         ),
         centerTitle: true,
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: (status) {
-              setState(() {
-                _selectedOrderStatus = status;
-              });
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'Not Approved',
-                child: Text('New Orders'),
-              ),
-              PopupMenuItem(
-                value: 'Approved',
-                child: Text('Approved Orders'),
-              ),
-              PopupMenuItem(
-                value: 'Sizing Done',
-                child: Text('Sizing'),
-              ),
-              PopupMenuItem(
-                value: 'Posting Done',
-                child: Text('Posting'),
-              ),
-              PopupMenuItem(
-                value: 'Packing Done',
-                child: Text('Packing'),
-              ),
-              PopupMenuItem(
-                value: 'Dispatched',
-                child: Text('Dispatch'),
-              ),
-            ],
-          ),
-        ],
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: tabStatuses.map((status) {
+            return Tab(
+              text: '$status (${_getOrderCount(status)})',
+            );
+          }).toList(),
+          onTap: (index) {
+            setState(() {
+              _selectedOrderStatus = tabStatuses[index];
+            });
+          },
+        ),
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection("orders")
-            .orderBy('ordertime', descending: true)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return Center(child: CircularProgressIndicator());
-          }
+      body: TabBarView(
+        controller: _tabController,
+        children: tabStatuses.map((status) {
+          return StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection("orders")
+                .where('status', isEqualTo: status)
+                .orderBy('ordertime', descending: true)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Center(child: CircularProgressIndicator());
+              }
 
-          final orders = snapshot.data!.docs;
+              final orders = snapshot.data!.docs;
+              final filteredOrders = orders
+                  .where((order) =>
+                      (order['status'] as String?) == _selectedOrderStatus)
+                  .toList();
 
-          final filteredOrders = orders.where((order) {
-            final orderStatus = order['status'] as String? ?? '';
-            return orderStatus == _selectedOrderStatus;
-          }).toList();
+              return ListView.builder(
+                itemCount: filteredOrders.length,
+                itemBuilder: (context, index) {
+                  final order = filteredOrders[index];
+                  final data = order.data() as Map<String, dynamic>;
+                  final img = data['orderpic'];
+                  final companyName =
+                      data['companyName'] as String? ?? 'Unknown Company';
+                  final dealerEmail =
+                      data['dealerEmail'] as String? ?? 'Unknown Email';
+                  final orderTime = data['ordertime'] as Timestamp?;
 
-          return ListView.builder(
-            itemCount: filteredOrders.length,
-            itemBuilder: (context, index) {
-              final order = filteredOrders[index];
-              log(order.toString());
-              final data = order.data() as Map<String, dynamic>;
-              final img = data['orderpic'];
-              final companyName =
-                  data['companyName'] as String? ?? 'Unknown Company';
-              final dealerEmail =
-                  data['dealerEmail'] as String? ?? 'Unknown Email';
-              final orderTime = data['ordertime'] as Timestamp?; // Order time
-
-              return Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                child: Card(
-                  elevation: 2,
-                  child: OrderTile(
-                    id: order.id,
-                    orderPicUrl: img,
-                    companyName: companyName,
-                    dealerEmail: dealerEmail,
-                    orderTime: orderTime,
-                  ),
-                ),
+                  return Padding(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    child: Card(
+                      elevation: 2,
+                      child: OrderTile(
+                        id: order.id,
+                        orderPicUrl: img,
+                        companyName: companyName,
+                        dealerEmail: dealerEmail,
+                        orderTime: orderTime,
+                      ),
+                    ),
+                  );
+                },
               );
             },
           );
-        },
+        }).toList(),
       ),
     );
+  }
+
+  // Function to get the count of orders for a specific status
+  Future<int> _getOrderCount(String status) async {
+    final ordersSnapshot = await FirebaseFirestore.instance
+        .collection("orders")
+        .where('status', isEqualTo: status)
+        .get();
+
+    return ordersSnapshot.size;
   }
 }
 
@@ -139,6 +155,8 @@ class OrderTile extends StatefulWidget {
 class _OrderTileState extends State<OrderTile> {
   bool _isExpanded = false;
   String _orderStatus = 'Not Approved'; // Default status
+  File? _billImage;
+  File? _biltyImage;
 
   @override
   void initState() {
@@ -162,7 +180,6 @@ class _OrderTileState extends State<OrderTile> {
   }
 
   void _updateOrderStatus(BuildContext context, String status) async {
-    // Show a confirmation alert dialog
     bool shouldUpdate = await showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
@@ -173,13 +190,13 @@ class _OrderTileState extends State<OrderTile> {
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                Navigator.of(dialogContext).pop(false); // Cancel the update
+                Navigator.of(dialogContext).pop(false);
               },
               child: Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(dialogContext).pop(true); // Confirm the update
+                Navigator.of(dialogContext).pop(true);
               },
               child: Text('Confirm'),
             ),
@@ -192,18 +209,52 @@ class _OrderTileState extends State<OrderTile> {
       try {
         final ordersCollection =
             FirebaseFirestore.instance.collection("orders");
+
+        // Update the order status
         await ordersCollection.doc(widget.id).update({'status': status});
+
+        // If the status is 'Packing Done', update bill and bilty URLs
+        if (status == 'Packing Done') {
+          if (_billImage != null) {
+            final billImageUrl = await _uploadImage(_billImage!);
+            if (billImageUrl != null) {
+              log(billImageUrl.toString());
+              try {
+                await ordersCollection
+                    .doc(widget.id)
+                    .update({'bill': billImageUrl});
+              } catch (e) {
+                log(e.toString());
+              }
+            }
+          }
+
+          if (_biltyImage != null) {
+            final biltyImageUrl = await _uploadImage(_biltyImage!);
+            if (biltyImageUrl != null) {
+              await ordersCollection
+                  .doc(widget.id)
+                  .update({'bilty': biltyImageUrl});
+            }
+          }
+        }
 
         setState(() {
           _orderStatus = status;
         });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Order $status successfully.'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        // Wrap the SnackBar in a try-catch block
+        try {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Order $status successfully.'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } catch (e) {
+          // Handle any potential errors here
+          print('Error showing SnackBar: $e');
+        }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -212,6 +263,36 @@ class _OrderTileState extends State<OrderTile> {
           ),
         );
       }
+    }
+  }
+
+  Future<String?> _uploadImage(File imageFile) async {
+    try {
+      final imageName =
+          widget.id + '_' + DateTime.now().millisecondsSinceEpoch.toString();
+      final firebaseStorageRef = firebase_storage.FirebaseStorage.instance
+          .ref()
+          .child('order_images/$imageName.jpg');
+
+      await firebaseStorageRef.putFile(imageFile);
+      final imageUrl = await firebaseStorageRef.getDownloadURL();
+      return imageUrl;
+    } catch (e) {
+      print('Error uploading image: $e');
+      return null;
+    }
+  }
+
+  Future<File?> _getImageFromSource(ImageSource source) async {
+    try {
+      final pickedFile = await ImagePicker().pickImage(source: source);
+      if (pickedFile != null) {
+        return File(pickedFile.path);
+      }
+      return null;
+    } catch (e) {
+      print('Error picking image: $e');
+      return null;
     }
   }
 
@@ -347,18 +428,75 @@ class _OrderTileState extends State<OrderTile> {
                   ],
                 ),
               if (_orderStatus == 'Packing Done')
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                Column(
                   children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () async {
+                            final billImageFile =
+                                await _getImageFromSource(ImageSource.gallery);
+                            if (billImageFile != null) {
+                              final billImageUrl =
+                                  await _uploadImage(billImageFile);
+                              if (billImageUrl != null) {
+                                setState(() {
+                                  _billImage = billImageFile;
+                                });
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                        'Bill image uploaded successfully.'),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                              } else {
+                                print('Error uploading bill image.');
+                              }
+                            }
+                          },
+                          child: Text('Upload Bill Image'),
+                        ),
+                        SizedBox(width: 16),
+                        ElevatedButton(
+                          onPressed: () async {
+                            final biltyImageFile =
+                                await _getImageFromSource(ImageSource.gallery);
+                            if (biltyImageFile != null) {
+                              final biltyImageUrl =
+                                  await _uploadImage(biltyImageFile);
+                              if (biltyImageUrl != null) {
+                                setState(() {
+                                  _biltyImage = biltyImageFile;
+                                });
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                        'Bilty image uploaded successfully.'),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                              } else {
+                                print('Error uploading bilty image.');
+                              }
+                            }
+                          },
+                          child: Text('Upload Bilty Image'),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: () {
-                        _updateOrderStatus(context, 'Dispatched');
-                      },
+                      onPressed: (_billImage != null && _biltyImage != null)
+                          ? () {
+                              _updateOrderStatus(context, 'Dispatched');
+                            }
+                          : null,
                       child: Text('Dispatched'),
                     ),
                   ],
                 ),
-              // Add more information or actions here
             ],
           ),
         ),
