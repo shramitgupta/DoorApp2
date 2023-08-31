@@ -157,11 +157,17 @@ class _OrderTileState extends State<OrderTile> {
   String _orderStatus = 'Not Approved'; // Default status
   File? _billImage;
   File? _biltyImage;
-
+  ScaffoldMessengerState? _scaffoldMessengerState;
   @override
   void initState() {
     super.initState();
     _fetchOrderStatus(); // Fetch order status when the widget is initialized
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _scaffoldMessengerState = ScaffoldMessenger.of(context);
   }
 
   void _fetchOrderStatus() async {
@@ -245,7 +251,7 @@ class _OrderTileState extends State<OrderTile> {
 
         // Wrap the SnackBar in a try-catch block
         try {
-          ScaffoldMessenger.of(context).showSnackBar(
+          _scaffoldMessengerState?.showSnackBar(
             SnackBar(
               content: Text('Order $status successfully.'),
               backgroundColor: Colors.green,
@@ -256,7 +262,7 @@ class _OrderTileState extends State<OrderTile> {
           print('Error showing SnackBar: $e');
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        _scaffoldMessengerState?.showSnackBar(
           SnackBar(
             content: Text('Error updating order status.'),
             backgroundColor: Colors.red,
