@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:io';
+
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -158,10 +159,15 @@ class _OrderTileState extends State<OrderTile> {
   File? _billImage;
   File? _biltyImage;
   ScaffoldMessengerState? _scaffoldMessengerState;
+  String? biltyImageUrl = null;
+  String? billImageUrl = null;
+  bool _isUploadingBillImage = false;
+  bool _isUploadingBiltyImage = false;
+
   @override
   void initState() {
     super.initState();
-    _fetchOrderStatus(); // Fetch order status when the widget is initialized
+    _fetchOrderStatus();
   }
 
   @override
@@ -177,15 +183,21 @@ class _OrderTileState extends State<OrderTile> {
           .doc(widget.id)
           .get();
 
-      setState(() {
-        _orderStatus = orderSnapshot.get('status') ?? 'Not Approved';
-      });
+      if (mounted) {
+        setState(() {
+          _orderStatus = orderSnapshot.get('status') ?? 'Not Approved';
+        });
+      }
     } catch (e) {
       print('Error fetching order status: $e');
     }
   }
 
   void _updateOrderStatus(BuildContext context, String status) async {
+    if (!mounted) {
+      return; // Widget is no longer in the tree
+    }
+
     bool shouldUpdate = await showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
@@ -219,73 +231,38 @@ class _OrderTileState extends State<OrderTile> {
         // Update the order status
         await ordersCollection.doc(widget.id).update({'status': status});
 
-        // If the status is 'Packing Done', update bill and bilty URLs
-        if (status == 'Packing Done') {
-          if (_billImage != null) {
-            final billImageUrl = await _uploadImage(_billImage!);
-            if (billImageUrl != null) {
-              log(billImageUrl.toString());
-              try {
-                await ordersCollection
-                    .doc(widget.id)
-                    .update({'bill': billImageUrl});
-              } catch (e) {
-                log(e.toString());
-              }
-            }
-          }
-
-          if (_biltyImage != null) {
-            final biltyImageUrl = await _uploadImage(_biltyImage!);
-            if (biltyImageUrl != null) {
-              await ordersCollection
-                  .doc(widget.id)
-                  .update({'bilty': biltyImageUrl});
-            }
-          }
+        if (billImageUrl != null) {
+          await ordersCollection.doc(widget.id).update({'bill': billImageUrl});
         }
 
-        setState(() {
-          _orderStatus = status;
-        });
+        if (biltyImageUrl != null) {
+          await ordersCollection
+              .doc(widget.id)
+              .update({'bilty': biltyImageUrl});
+        }
 
-        // Wrap the SnackBar in a try-catch block
-        try {
+        if (mounted) {
+          setState(() {
+            _orderStatus = status;
+          });
+
           _scaffoldMessengerState?.showSnackBar(
             SnackBar(
               content: Text('Order $status successfully.'),
               backgroundColor: Colors.green,
             ),
           );
-        } catch (e) {
-          // Handle any potential errors here
-          print('Error showing SnackBar: $e');
         }
       } catch (e) {
-        _scaffoldMessengerState?.showSnackBar(
-          SnackBar(
-            content: Text('Error updating order status.'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        if (mounted) {
+          _scaffoldMessengerState?.showSnackBar(
+            SnackBar(
+              content: Text('Error updating order status.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
-    }
-  }
-
-  Future<String?> _uploadImage(File imageFile) async {
-    try {
-      final imageName =
-          widget.id + '_' + DateTime.now().millisecondsSinceEpoch.toString();
-      final firebaseStorageRef = firebase_storage.FirebaseStorage.instance
-          .ref()
-          .child('order_images/$imageName.jpg');
-
-      await firebaseStorageRef.putFile(imageFile);
-      final imageUrl = await firebaseStorageRef.getDownloadURL();
-      return imageUrl;
-    } catch (e) {
-      print('Error uploading image: $e');
-      return null;
     }
   }
 
@@ -440,66 +417,16 @@ class _OrderTileState extends State<OrderTile> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         ElevatedButton(
-                          onPressed: () async {
-                            final billImageFile =
-                                await _getImageFromSource(ImageSource.gallery);
-                            if (billImageFile != null) {
-                              final billImageUrl =
-                                  await _uploadImage(billImageFile);
-                              if (billImageUrl != null) {
-                                setState(() {
-                                  _billImage = billImageFile;
-                                });
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                        'Bill image uploaded successfully.'),
-                                    backgroundColor: Colors.green,
-                                  ),
-                                );
-                              } else {
-                                print('Error uploading bill image.');
-                              }
-                            }
-                          },
-                          child: Text('Upload Bill Image'),
-                        ),
-                        SizedBox(width: 16),
-                        ElevatedButton(
-                          onPressed: () async {
-                            final biltyImageFile =
-                                await _getImageFromSource(ImageSource.gallery);
-                            if (biltyImageFile != null) {
-                              final biltyImageUrl =
-                                  await _uploadImage(biltyImageFile);
-                              if (biltyImageUrl != null) {
-                                setState(() {
-                                  _biltyImage = biltyImageFile;
-                                });
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                        'Bilty image uploaded successfully.'),
-                                    backgroundColor: Colors.green,
-                                  ),
-                                );
-                              } else {
-                                print('Error uploading bilty image.');
-                              }
-                            }
-                          },
-                          child: Text('Upload Bilty Image'),
+                          onPressed: (_billImage == null || _biltyImage == null)
+                              ? () {
+                                  _uploadBillAndBiltyImages(context);
+                                }
+                              : null,
+                          child: _isUploadingBillImage || _isUploadingBiltyImage
+                              ? CircularProgressIndicator()
+                              : Text('Upload Bill and Bilty Images'),
                         ),
                       ],
-                    ),
-                    SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: (_billImage != null && _biltyImage != null)
-                          ? () {
-                              _updateOrderStatus(context, 'Dispatched');
-                            }
-                          : null,
-                      child: Text('Dispatched'),
                     ),
                   ],
                 ),
@@ -513,6 +440,100 @@ class _OrderTileState extends State<OrderTile> {
         });
       },
     );
+  }
+
+  Future<void> _uploadBillAndBiltyImages(BuildContext context) async {
+    final billImageFile = await _getImageFromSource(ImageSource.gallery);
+    final biltyImageFile = await _getImageFromSource(ImageSource.gallery);
+
+    if (billImageFile == null || biltyImageFile == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please select both bill and bilty images.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isUploadingBillImage = true;
+      _isUploadingBiltyImage = true;
+    });
+
+    final billUploadTask = _uploadImage(billImageFile);
+    final biltyUploadTask = _uploadImage(biltyImageFile);
+
+    try {
+      final List<String?> results =
+          await Future.wait([billUploadTask, biltyUploadTask]);
+
+      billImageUrl = results[0];
+      biltyImageUrl = results[1];
+
+      if (billImageUrl != null && biltyImageUrl != null) {
+        setState(() {
+          _billImage = billImageFile;
+          _biltyImage = biltyImageFile;
+          billImageUrl = billImageUrl;
+          biltyImageUrl = biltyImageUrl;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Bill and bilty images uploaded successfully.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // Update the order status to 'Dispatched' after both images are uploaded
+        _updateOrderStatus(context, 'Dispatched');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error uploading images.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error uploading images: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isUploadingBillImage = false;
+        _isUploadingBiltyImage = false;
+      });
+    }
+  }
+
+  // Function to upload an image to Firebase Storage
+  Future<String?> _uploadImage(File imageFile) async {
+    try {
+      final imageName =
+          widget.id + '_' + DateTime.now().millisecondsSinceEpoch.toString();
+      final firebaseStorageRef = firebase_storage.FirebaseStorage.instance
+          .ref()
+          .child('order_images/$imageName.jpg');
+
+      final uploadTask = firebaseStorageRef.putFile(imageFile);
+      final storageSnapshot = await uploadTask;
+
+      if (storageSnapshot.state == firebase_storage.TaskState.success) {
+        final imageUrl = await firebaseStorageRef.getDownloadURL();
+        return imageUrl;
+      } else {
+        print('Image upload failed: ${storageSnapshot.state}');
+        return null;
+      }
+    } catch (e) {
+      print('Error uploading image: $e');
+      return null;
+    }
   }
 }
 

@@ -17,13 +17,13 @@ class PlaceOrder extends StatefulWidget {
 class _PlaceOrderState extends State<PlaceOrder> {
   File? orderpic;
   String status = 'Not Approved';
-  String approvedtime = 'N/A';
-  String sizingtime = 'N/A';
-  String postingtime = 'N/A';
-  String packingtime = 'N/A';
-  String dispatchtime = 'N/A';
-  String bilty = 'N/A';
-  String bill = 'N/A';
+  String approvedtime = '';
+  String sizingtime = '';
+  String postingtime = '';
+  String packingtime = '';
+  String dispatchtime = '';
+  String? bilty = null;
+  String? bill = null;
 
   Future<void> _getImageFromSource(ImageSource source) async {
     XFile? selectedImage = await ImagePicker().pickImage(source: source);
