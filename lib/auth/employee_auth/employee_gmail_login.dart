@@ -1,4 +1,5 @@
-import 'package:doorapp2/auth/employee_auth/employee_gmail_login.dart';
+import 'package:doorapp2/admin_homescreen/admin_homescreen_part/admin_orders.dart';
+import 'package:doorapp2/auth/user_auth/user_gmail_login.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -6,14 +7,14 @@ import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore packa
 import 'package:doorapp2/auth/admin_auth/admin_gmail_login.dart';
 import 'package:doorapp2/dealer_homescreen/dealer_homescreen.dart';
 
-class UserGmailLogin extends StatefulWidget {
-  const UserGmailLogin({Key? key});
+class EmployeeLogin extends StatefulWidget {
+  const EmployeeLogin({Key? key});
 
   @override
-  State<UserGmailLogin> createState() => _UserGmailLoginState();
+  State<EmployeeLogin> createState() => _EmployeeLoginState();
 }
 
-class _UserGmailLoginState extends State<UserGmailLogin> {
+class _EmployeeLoginState extends State<EmployeeLogin> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   bool isLoading = false;
@@ -23,7 +24,7 @@ class _UserGmailLoginState extends State<UserGmailLogin> {
   Future<bool> verifyDealerEmail(String enteredEmail) async {
     try {
       final dealerSnapshot = await FirebaseFirestore.instance
-          .collection('dealer')
+          .collection('employee')
           .where('email', isEqualTo: enteredEmail)
           .get();
       return dealerSnapshot.docs.isNotEmpty;
@@ -70,7 +71,7 @@ class _UserGmailLoginState extends State<UserGmailLogin> {
         Navigator.pushReplacement(
           context,
           CupertinoPageRoute(
-            builder: (context) => const DealerHomeScreen(),
+            builder: (context) => const AdminOrders(),
           ),
         );
       }
@@ -101,7 +102,7 @@ class _UserGmailLoginState extends State<UserGmailLogin> {
           children: [
             SizedBox(height: screenHeight * 0.1),
             Text(
-              "Dealer\nLogin",
+              "Employee\nLogin",
               style: TextStyle(
                 fontSize: 60,
                 fontWeight: FontWeight.bold,
@@ -207,11 +208,11 @@ class _UserGmailLoginState extends State<UserGmailLogin> {
                 },
               ),
             ),
-            //  SizedBox(height: 16),
+            SizedBox(height: 16),
             Center(
               child: TextButton(
                 child: Text(
-                  "Login as Employee",
+                  "Login as Dealer",
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.brown.shade900,
@@ -220,7 +221,7 @@ class _UserGmailLoginState extends State<UserGmailLogin> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => EmployeeLogin()),
+                    MaterialPageRoute(builder: (context) => UserGmailLogin()),
                   );
                 },
               ),

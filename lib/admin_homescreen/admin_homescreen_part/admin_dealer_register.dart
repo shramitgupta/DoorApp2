@@ -194,7 +194,15 @@ class _DealerRegisterState extends State<DealerRegister> {
     int cage = int.parse(cageString);
     String uid = getCurrentUserId();
 
-    if (cname.isNotEmpty &&
+    if (gstno.isNotEmpty &&
+        comapnyno.isNotEmpty &&
+        companyname.isNotEmpty &&
+        panno.isNotEmpty &&
+        aadharno.isNotEmpty &&
+        pin.isNotEmpty &&
+        password.isNotEmpty &&
+        email.isNotEmpty &&
+        cname.isNotEmpty &&
         cpnoString.isNotEmpty &&
         caddress.isNotEmpty &&
         cageString.isNotEmpty &&
@@ -295,6 +303,15 @@ class _DealerRegisterState extends State<DealerRegister> {
 
   void clearFields() {
     setState(() {
+      addressController.clear();
+      aadharnoController.clear();
+      pannoController.clear();
+      companynameController.clear();
+      cnoController.clear();
+      gstController.clear();
+      passController.clear();
+      emailController.clear();
+      pinController.clear();
       snameController.clear();
       spnoController.clear();
       saddressController.clear();
@@ -946,20 +963,7 @@ class _DealerRegisterState extends State<DealerRegister> {
                       ),
                     ),
                   ),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
-                      margin: const EdgeInsets.all(10),
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: areAllFieldsFilled,
-                        child: const Text(
-                          "Register",
-                          style: TextStyle(color: Colors.white, fontSize: 18),
-                        ),
-                      ),
-                    ),
-                  ),
+
                   Align(
                     alignment: Alignment.bottomCenter,
                     child: Container(

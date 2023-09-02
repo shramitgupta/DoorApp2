@@ -1,5 +1,6 @@
 import 'package:doorapp2/admin_homescreen/admin_homescreen_part/admin_dealerList.dart';
 import 'package:doorapp2/admin_homescreen/admin_homescreen_part/admin_dealer_register.dart';
+import 'package:doorapp2/admin_homescreen/admin_homescreen_part/admin_employee_register.dart';
 import 'package:doorapp2/admin_homescreen/admin_homescreen_part/admin_orders.dart';
 import 'package:doorapp2/admin_homescreen/admin_homescreen_part/admin_totalorders.dart';
 import 'package:doorapp2/auth/admin_auth/admin_gmail_login.dart';
@@ -19,11 +20,7 @@ List button = [
   'Dealer List',
   'Total Order',
   'Orders',
-  'Gift Request',
-  'What to Send',
-  'Total Gifts Sent',
-  'Add Gifts',
-  'Delete Carpenter',
+  'Employee Register',
   'LOGOUT'
 ];
 
@@ -108,7 +105,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const TotalOrders(),
+                                builder: (context) => TotalOrders(),
                               ),
                             );
                           } else if (index == 3) {
@@ -119,44 +116,13 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                               ),
                             );
                           } else if (index == 4) {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) =>
-                            //         const CarpenterGiftRequest(),
-                            //   ),
-                            // );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const EmployeeRegister(),
+                              ),
+                            );
                           } else if (index == 5) {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) =>
-                            //         const CarpenterWhatToSend(),
-                            //   ),
-                            // );
-                          } else if (index == 6) {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) =>
-                            //         const CarpenterTotalGifts(),
-                            //   ),
-                            // );
-                          } else if (index == 7) {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) => const CarpenterAddGifts(),
-                            //   ),
-                            // );
-                          } else if (index == 8) {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) => const CarpenterDelete(),
-                            //   ),
-                            // );
-                          } else if (index == 9) {
                             logOut();
                           }
                         },
