@@ -140,7 +140,16 @@ class _PlaceOrderState extends State<PlaceOrder> {
         "bilty": bilty,
         "bill": bill,
       };
+
       FirebaseFirestore.instance.collection("orders").add(orderData);
+
+      // Increment the 'totalorders' field in the dealer's document
+      int currentTotalOrders = dealerSnapshot['totalorders'] ?? 0;
+      int newTotalOrders = currentTotalOrders + 1;
+      await FirebaseFirestore.instance
+          .collection("dealer")
+          .doc(userId)
+          .update({"totalorders": newTotalOrders});
 
       setState(() {
         isUploading = false;

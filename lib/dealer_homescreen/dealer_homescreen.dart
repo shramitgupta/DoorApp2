@@ -14,19 +14,7 @@ class DealerHomeScreen extends StatefulWidget {
 }
 
 String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
-List button = [
-  'Profile Screen',
-  'Place Order',
-  'Order Status',
-  'Leader Board',
-  'Gift Details',
-  'Redeem Status',
-  'Points Used',
-  'Contact Details',
-  'Banking',
-  'Upcomming Events',
-  'LOGOUT'
-];
+List button = ['Profile Screen', 'Place Order', 'Order Status', 'LOGOUT'];
 
 class _DealerHomeScreenState extends State<DealerHomeScreen> {
   void logOut() async {
@@ -111,57 +99,6 @@ class _DealerHomeScreenState extends State<DealerHomeScreen> {
                               ),
                             );
                           } else if (index == 3) {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) => const UserLeaderBoard(),
-                            //   ),
-                            // );
-                          } else if (index == 4) {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) => const UserGiftDetails(),
-                            //   ),
-                            // );
-                          } else if (index == 5) {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) => UserRedeemStatus(),
-                            //   ),
-                            // );
-                          } else if (index == 6) {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) => const UserPointsUsed(),
-                            //   ),
-                            // );
-                          } else if (index == 7) {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) =>
-                            //         const UserContactDetails(),
-                            //   ),
-                            // );
-                          } else if (index == 8) {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) => const UserBanking(),
-                            //   ),
-                            // );
-                          } else if (index == 9) {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) =>
-                            //         const UserUpcommingEvent(),
-                            //   ),
-                            // );
-                          } else if (index == 10) {
                             logOut();
                           }
                         },

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
+import 'dart:io';
 
 class DealerMoreStatus extends StatefulWidget {
   final DocumentSnapshot document;
@@ -12,14 +15,18 @@ class DealerMoreStatus extends StatefulWidget {
 }
 
 class _DealerMoreStatusState extends State<DealerMoreStatus> {
+  String status = '';
   bool showBillImage = false;
   bool showBiltyImage = false;
 
   @override
-  Widget build(BuildContext context) {
-    String status = widget.document['status'];
+  void initState() {
+    super.initState();
+    status = widget.document['status'];
+  }
 
-    // Define a list of status items with their names, approval states, and icons
+  @override
+  Widget build(BuildContext context) {
     List<StatusItem> statusItems = [
       StatusItem('Not Approved', false, Icons.error),
       StatusItem('Approved', true, Icons.check_circle),
@@ -27,13 +34,13 @@ class _DealerMoreStatusState extends State<DealerMoreStatus> {
       StatusItem('Posting Done', true, Icons.check_circle_outline),
       StatusItem('Packing Done', true, Icons.check_circle_outline),
       StatusItem('Dispatched', true, Icons.local_shipping),
-      StatusItem('Recieved', true, Icons.done_all),
+      StatusItem('Received', true, Icons.done_all),
     ];
 
     return Scaffold(
       appBar: AppBar(
         title: Text('Order Status Details'),
-        backgroundColor: Colors.green, // Customize the app bar color
+        backgroundColor: Colors.green,
       ),
       body: SingleChildScrollView(
         child: Center(
@@ -56,12 +63,17 @@ class _DealerMoreStatusState extends State<DealerMoreStatus> {
                 ),
               ),
               SizedBox(height: 20),
-              // Build the status list with a custom design
               StatusList(
                 statusItems: statusItems,
                 currentStatus: status,
               ),
-              if (status == 'Dispatched')
+              if (status == 'Dispatched') ...[
+                ElevatedButton(
+                  onPressed: () {
+                    showConfirmationDialog('Received');
+                  },
+                  child: Text('Mark as Received'),
+                ),
                 ElevatedButton(
                   onPressed: () {
                     setState(() {
@@ -70,9 +82,18 @@ class _DealerMoreStatusState extends State<DealerMoreStatus> {
                   },
                   child: Text('Show Bill Image'),
                 ),
-              if (showBillImage)
-                buildImage(widget.document['bill'], 'Bill Image'),
-              if (status == 'Dispatched')
+              ],
+              if (showBillImage) ...[
+                buildImage(context, widget.document['bill'], 'Bill Image'),
+                ElevatedButton(
+                  onPressed: () {
+                    downloadImage(
+                        context, widget.document['bill'], 'Bill Image');
+                  },
+                  child: Text('Download Bill Image'),
+                ),
+              ],
+              if (status == 'Dispatched') ...[
                 ElevatedButton(
                   onPressed: () {
                     setState(() {
@@ -81,8 +102,17 @@ class _DealerMoreStatusState extends State<DealerMoreStatus> {
                   },
                   child: Text('Show Bilty Image'),
                 ),
-              if (showBiltyImage)
-                buildImage(widget.document['bilty'], 'Bilty Image'),
+              ],
+              if (showBiltyImage) ...[
+                buildImage(context, widget.document['bilty'], 'Bilty Image'),
+                ElevatedButton(
+                  onPressed: () {
+                    downloadImage(
+                        context, widget.document['bilty'], 'Bilty Image');
+                  },
+                  child: Text('Download Bilty Image'),
+                ),
+              ],
             ],
           ),
         ),
@@ -90,11 +120,11 @@ class _DealerMoreStatusState extends State<DealerMoreStatus> {
     );
   }
 
-  Widget buildImage(String? imageUrl, String imageLabel) {
+  Widget buildImage(BuildContext context, String? imageUrl, String imageLabel) {
     if (imageUrl != null) {
       return GestureDetector(
         onTap: () {
-          showImageDialog(imageUrl, imageLabel);
+          showImageDialog(context, imageUrl, imageLabel);
         },
         child: Column(
           children: [
@@ -115,12 +145,12 @@ class _DealerMoreStatusState extends State<DealerMoreStatus> {
         ),
       );
     } else {
-      // Handle the case where imageUrl is null or empty
       return Text('No $imageLabel available.');
     }
   }
 
-  void showImageDialog(String imageUrl, String imageLabel) {
+  void showImageDialog(
+      BuildContext context, String imageUrl, String imageLabel) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -153,6 +183,49 @@ class _DealerMoreStatusState extends State<DealerMoreStatus> {
     } else {
       print('Image URL is null or empty.');
     }
+  }
+
+  void updateStatus(String newStatus) {
+    FirebaseFirestore.instance
+        .collection('orders')
+        .doc(widget.document.id)
+        .update({
+      'status': newStatus,
+    }).then((_) {
+      setState(() {
+        status = newStatus;
+      });
+    }).catchError((error) {
+      print('Error updating status: $error');
+    });
+  }
+
+  void showConfirmationDialog(String newStatus) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Status Update'),
+          content: Text(
+              'Are you sure you want to update the status to "$newStatus"?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                updateStatus(newStatus);
+                Navigator.of(context).pop();
+              },
+              child: Text('Confirm'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 
@@ -208,5 +281,30 @@ class StatusList extends StatelessWidget {
         );
       }).toList(),
     );
+  }
+}
+
+void downloadImage(
+    BuildContext context, String? imageUrl, String imageLabel) async {
+  if (imageUrl != null) {
+    final directory = await getApplicationDocumentsDirectory();
+    final filePath = '${directory.path}/$imageLabel.jpg';
+
+    final response = await http.get(Uri.parse(imageUrl));
+
+    if (response.statusCode == 200) {
+      final File file = File(filePath);
+      await file.writeAsBytes(response.bodyBytes);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$imageLabel downloaded successfully.'),
+        ),
+      );
+    } else {
+      print('Failed to download $imageLabel: ${response.statusCode}');
+    }
+  } else {
+    print('Image URL is null or empty.');
   }
 }
