@@ -124,7 +124,6 @@ class _AdminOrdersState extends State<AdminOrders>
     );
   }
 
-  // Function to get the count of orders for a specific status
   Future<int> _getOrderCount(String status) async {
     final ordersSnapshot = await FirebaseFirestore.instance
         .collection("orders")
@@ -141,6 +140,7 @@ class OrderTile extends StatefulWidget {
   final String orderPicUrl;
   final String id;
   final Timestamp? orderTime;
+
   OrderTile({
     required this.id,
     required this.orderPicUrl,
@@ -239,6 +239,35 @@ class _OrderTileState extends State<OrderTile> {
           await ordersCollection
               .doc(widget.id)
               .update({'bilty': biltyImageUrl});
+        }
+
+        if (status == 'rejected') {
+          // Fetch the user ID associated with the order
+          final orderSnapshot = await FirebaseFirestore.instance
+              .collection("orders")
+              .doc(widget.id)
+              .get();
+          final userId = orderSnapshot.get('userId') as String?;
+
+          if (userId != null) {
+            // Fetch the dealer document
+            final dealerSnapshot = await FirebaseFirestore.instance
+                .collection("dealer")
+                .doc(userId)
+                .get();
+
+            if (dealerSnapshot.exists) {
+              // Decrement the totalorders field by 1
+              final currentTotalOrders =
+                  dealerSnapshot.get('totalorders') as int?;
+              if (currentTotalOrders != null && currentTotalOrders > 0) {
+                await FirebaseFirestore.instance
+                    .collection("dealer")
+                    .doc(userId)
+                    .update({'totalorders': currentTotalOrders - 1});
+              }
+            }
+          }
         }
 
         if (mounted) {
