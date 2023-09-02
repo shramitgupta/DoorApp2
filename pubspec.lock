@@ -153,6 +153,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  file:
+    dependency: transitive
+    description:
+      name: file
+      sha256: "5fc22d7c25582e38ad9a8515372cd9a93834027aacf1801cf01164dac0ffa08c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "7.0.0"
   file_selector_linux:
     dependency: transitive
     description:
@@ -504,6 +512,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.3.2"
+  order_tracker:
+    dependency: "direct main"
+    description:
+      name: order_tracker
+      sha256: "49d019da3da52c27ba080fad2b714958529dc3feaba7b0696b81cd5f955c7c19"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.2"
+  order_tracker_zen:
+    dependency: "direct main"
+    description:
+      name: order_tracker_zen
+      sha256: a91ce3aa32cd2f2a0879d11ad67d97798cb253e856627801fc36189d5b7e6909
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0+4"
   path:
     dependency: transitive
     description:
@@ -656,6 +680,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.0"
+  share_plus:
+    dependency: "direct main"
+    description:
+      name: share_plus
+      sha256: "6cec740fa0943a826951223e76218df002804adb588235a8910dc3d6b0654e11"
+      url: "https://pub.dev"
+    source: hosted
+    version: "7.1.0"
+  share_plus_platform_interface:
+    dependency: transitive
+    description:
+      name: share_plus_platform_interface
+      sha256: "357412af4178d8e11d14f41723f80f12caea54cf0d5cd29af9dcdab85d58aea7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.3.0"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -717,6 +757,38 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.2"
+  url_launcher_linux:
+    dependency: transitive
+    description:
+      name: url_launcher_linux
+      sha256: b651aad005e0cb06a01dbd84b428a301916dc75f0e7ea6165f80057fee2d8e8e
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.6"
+  url_launcher_platform_interface:
+    dependency: transitive
+    description:
+      name: url_launcher_platform_interface
+      sha256: "95465b39f83bfe95fcb9d174829d6476216f2d548b79c38ab2506e0458787618"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.5"
+  url_launcher_web:
+    dependency: transitive
+    description:
+      name: url_launcher_web
+      sha256: ba140138558fcc3eead51a1c42e92a9fb074a1b1149ed3c73e66035b2ccd94f2
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.19"
+  url_launcher_windows:
+    dependency: transitive
+    description:
+      name: url_launcher_windows
+      sha256: "95fef3129dc7cfaba2bc3d5ba2e16063bb561fc6d78e63eee16162bc70029069"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.8"
   uuid:
     dependency: "direct main"
     description:
