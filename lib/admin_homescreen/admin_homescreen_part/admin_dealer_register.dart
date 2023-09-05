@@ -866,6 +866,7 @@ class _DealerRegisterState extends State<DealerRegister> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: TextFormField(
+                      keyboardType: TextInputType.phone,
                       controller: aadharnoController,
                       enabled:
                           !isLoading, // Disable the field when isLoading is true
@@ -891,11 +892,14 @@ class _DealerRegisterState extends State<DealerRegister> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: TextFormField(
+                      keyboardType: TextInputType.phone,
+                      maxLength: 6,
                       controller: pinController,
                       enabled:
                           !isLoading, // Disable the field when isLoading is true
                       cursorColor: Colors.brown.shade900,
                       decoration: InputDecoration(
+                        counter: const Offstage(),
                         labelText: 'Enter Pincode',
                         labelStyle: TextStyle(color: Colors.brown.shade900),
                         enabledBorder: OutlineInputBorder(

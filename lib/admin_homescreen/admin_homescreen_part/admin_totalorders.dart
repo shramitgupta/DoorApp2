@@ -15,12 +15,14 @@ class _TotalOrdersState extends State<TotalOrders>
   late Animation<int> _approvedOrdersAnimation;
   late Animation<int> _newOrdersAnimation;
   late Animation<int> _rejectedOrdersAnimation;
-
+  late Animation<int> _receivedOrdersAnimation;
+  late Animation<int> _dispatchedOrdersAnimation;
+  int receivedOrders = 0;
   int totalOrders = 0;
   int approvedOrders = 0;
   int newOrders = 0;
   int rejectedOrders = 0;
-
+  int dispatchedOrder = 0;
   @override
   void initState() {
     super.initState();
@@ -44,7 +46,13 @@ class _TotalOrdersState extends State<TotalOrders>
     _rejectedOrdersAnimation = IntTween(begin: 0, end: rejectedOrders).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
-
+    _receivedOrdersAnimation = IntTween(begin: 0, end: receivedOrders).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+    _dispatchedOrdersAnimation =
+        IntTween(begin: 0, end: dispatchedOrder).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
     _fetchOrderCounts();
   }
 
@@ -67,9 +75,19 @@ class _TotalOrdersState extends State<TotalOrders>
           .collection("orders")
           .where('status', isEqualTo: 'rejected')
           .get();
+      final QuerySnapshot receivedSnapshot = await FirebaseFirestore.instance
+          .collection("orders")
+          .where('status', isEqualTo: 'Received')
+          .get();
+      final QuerySnapshot dispatchedSnapshot = await FirebaseFirestore.instance
+          .collection("orders")
+          .where('status', isEqualTo: 'Dispatched')
+          .get();
 
       setState(() {
         // Update counts with data from Firestore
+        dispatchedOrder = dispatchedSnapshot.size;
+        receivedOrders = receivedSnapshot.size;
         totalOrders = totalSnapshot.size;
         approvedOrders = approvedSnapshot.size;
         newOrders = newSnapshot.size;
@@ -91,6 +109,14 @@ class _TotalOrdersState extends State<TotalOrders>
 
         _rejectedOrdersAnimation =
             IntTween(begin: 0, end: rejectedOrders).animate(
+          CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+        );
+        _receivedOrdersAnimation =
+            IntTween(begin: 0, end: receivedOrders).animate(
+          CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+        );
+        _dispatchedOrdersAnimation =
+            IntTween(begin: 0, end: dispatchedOrder).animate(
           CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
         );
 
@@ -135,6 +161,14 @@ class _TotalOrdersState extends State<TotalOrders>
           _buildAnimatedCounter(
             label: 'Rejected Orders',
             animation: _rejectedOrdersAnimation,
+          ),
+          _buildAnimatedCounter(
+            label: 'Dispatched Orders',
+            animation: _dispatchedOrdersAnimation,
+          ),
+          _buildAnimatedCounter(
+            label: 'Recieved  Orders',
+            animation: _receivedOrdersAnimation,
           ),
         ],
       ),

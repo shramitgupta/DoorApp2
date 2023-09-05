@@ -1,4 +1,5 @@
 import 'package:doorapp2/auth/user_auth/user_gmail_login.dart';
+import 'package:doorapp2/dealer_homescreen/dealer_homescreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -18,13 +19,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: (FirebaseAuth.instance.currentUser != null)
-          ? UserGmailLogin() // UserPhoneNoLogin
+          ? DealerHomeScreen() // UserPhoneNoLogin
           : UserGmailLogin(),
     );
-    //     MaterialApp(
-    //   home: (FirebaseAuth.instance.currentUser != null)
-    //       ? const AdminHomeScreen()
-    //       : AdminPhoneNoLogin(),
-    // );
   }
 }

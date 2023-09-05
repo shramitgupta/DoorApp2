@@ -230,7 +230,8 @@ class _AdminDealerListState extends State<AdminDealerList> {
                                 docData['companyname'] ?? 'No Company Name';
                             final subtitle = docData['email'] ?? 'No Email';
                             final ranking = (index + 1).toString();
-                            final totalOrderPoints = docData['totalorder'] ?? 0;
+                            final totalOrderPoints =
+                                docData['totalorders'] ?? 0;
                             return Card(
                               elevation: 6,
                               margin: const EdgeInsets.all(10),
@@ -308,7 +309,7 @@ class _AdminDealerListState extends State<AdminDealerList> {
                                 final subtitle = docData['email'] ?? 'No Email';
                                 final ranking = (index + 1).toString();
                                 final totalOrderPoints =
-                                    docData['totalorder'] ?? 0;
+                                    docData['totalorders'] ?? 0;
                                 return Card(
                                   elevation: 6,
                                   margin: const EdgeInsets.all(10),
@@ -428,7 +429,7 @@ class _AdminDealerListState extends State<AdminDealerList> {
                                         docData['email'] ?? 'No Email';
                                     final ranking = (index + 1).toString();
                                     final totalOrderPoints =
-                                        docData['totalorder'] ?? 0;
+                                        docData['totalorders'] ?? 0;
                                     return Card(
                                       elevation: 6,
                                       margin: const EdgeInsets.all(10),
@@ -491,7 +492,7 @@ class _AdminDealerListState extends State<AdminDealerList> {
                                 child: StreamBuilder<QuerySnapshot>(
                                   stream: FirebaseFirestore.instance
                                       .collection("dealer")
-                                      .orderBy("totalorder", descending: true)
+                                      .orderBy("totalorders", descending: true)
                                       .snapshots(),
                                   builder: (context, snapshot) {
                                     if (snapshot.hasError) {
@@ -520,7 +521,7 @@ class _AdminDealerListState extends State<AdminDealerList> {
                                             docData['email'] ?? 'No Email';
                                         final ranking = (index + 1).toString();
                                         final totalOrderPoints =
-                                            docData['totalorder'] ?? 0;
+                                            docData['totalorders'] ?? 0;
                                         return Card(
                                           elevation: 6,
                                           margin: const EdgeInsets.all(10),
