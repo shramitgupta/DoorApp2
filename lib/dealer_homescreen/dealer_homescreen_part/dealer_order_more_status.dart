@@ -28,7 +28,7 @@ class _DealerMoreStatusState extends State<DealerMoreStatus> {
   @override
   Widget build(BuildContext context) {
     List<StatusItem> statusItems = [
-      StatusItem('Not Approved', false, Icons.error),
+      StatusItem('rejected', false, Icons.error),
       StatusItem('Approved', true, Icons.check_circle),
       StatusItem('Sizing Done', true, Icons.done),
       StatusItem('Posting Done', true, Icons.check_circle_outline),
