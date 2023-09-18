@@ -251,7 +251,7 @@ class OrderListScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.brown.shade900,
         title: Text(
-          statusFilter == null ? 'All Orders' : ' $statusFilter',
+          statusFilter == null ? 'All Orders' : statusFilter!,
           style: TextStyle(
             fontSize: 27,
             fontWeight: FontWeight.bold,
@@ -271,6 +271,7 @@ class OrderListScreen extends StatelessWidget {
             ? FirebaseFirestore.instance.collection("orders").snapshots()
             : FirebaseFirestore.instance
                 .collection("orders")
+                .orderBy('ordertime', descending: true)
                 .where('status', isEqualTo: statusFilter)
                 .snapshots(),
         builder: (context, snapshot) {
@@ -317,63 +318,70 @@ class OrderListItem extends StatelessWidget {
     final String dealerEmail = order['dealerEmail'];
     final Timestamp? orderTime = order['ordertime']; // Make orderTime nullable
 
-    return ListTile(
-      title: Text(
-        companyName,
-        style: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
+    return Card(
+      elevation: 4,
+      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0),
       ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(height: 4),
-          Row(
-            children: [
-              Icon(
-                Icons.email,
-                color: Colors.grey,
-                size: 18,
-              ),
-              SizedBox(width: 4),
-              Text(
-                dealerEmail,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
-                ),
-              ),
-            ],
+      child: ListTile(
+        title: Text(
+          companyName,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
           ),
-          SizedBox(height: 4),
-          if (orderTime != null) // Check if orderTime is not null
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 8),
             Row(
               children: [
                 Icon(
-                  Icons.access_time,
+                  Icons.email,
                   color: Colors.grey,
                   size: 18,
                 ),
                 SizedBox(width: 4),
                 Text(
-                  'Order Time: ${DateFormat('dd-MM-yyyy hh:mm a').format(orderTime.toDate())}',
+                  dealerEmail,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 16,
                     color: Colors.grey,
                   ),
                 ),
               ],
             ),
-          if (orderTime == null) // Handle case when orderTime is null
-            Text(
-              'Order Time: N/A',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
+            SizedBox(height: 8),
+            if (orderTime != null) // Check if orderTime is not null
+              Row(
+                children: [
+                  Icon(
+                    Icons.access_time,
+                    color: Colors.grey,
+                    size: 18,
+                  ),
+                  SizedBox(width: 4),
+                  Text(
+                    'Order Time: ${DateFormat('dd-MM-yyyy hh:mm a').format(orderTime.toDate())}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
               ),
-            ),
-        ],
+            if (orderTime == null) // Handle case when orderTime is null
+              Text(
+                'Order Time: N/A',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
