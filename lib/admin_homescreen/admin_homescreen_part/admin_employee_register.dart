@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:doorapp2/admin_homescreen/admin_homescreen.dart';
 import 'package:doorapp2/auth/admin_auth/admin_gmail_login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -49,8 +50,8 @@ class _EmployeeRegisterState extends State<EmployeeRegister> {
           statusMessage = 'Successfully signed up!';
         });
 
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => AdminLogin()));
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) => AdminHomeScreen()));
       }
     } on FirebaseAuthException catch (ex) {
       setState(() {

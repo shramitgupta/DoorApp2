@@ -29,6 +29,7 @@ class _DealerMoreStatusState extends State<DealerMoreStatus> {
   Widget build(BuildContext context) {
     List<StatusItem> statusItems = [
       StatusItem('rejected', false, Icons.error),
+      StatusItem('Not Approved', true, Icons.question_mark),
       StatusItem('Approved', true, Icons.check_circle),
       StatusItem('Sizing Done', true, Icons.done),
       StatusItem('Posting Done', true, Icons.check_circle_outline),
@@ -251,7 +252,7 @@ class StatusList extends StatelessWidget {
       children: statusItems.map((statusItem) {
         bool isActive = statusItem.name == currentStatus;
         return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
           child: Row(
             children: [
               Container(

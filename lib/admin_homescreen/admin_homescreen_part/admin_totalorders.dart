@@ -78,7 +78,7 @@ class _TotalOrdersState extends State<TotalOrders>
 
       final QuerySnapshot rejectedSnapshot = await FirebaseFirestore.instance
           .collection("orders")
-          .where('status', isEqualTo: 'Rejected')
+          .where('status', isEqualTo: 'rejected')
           .get();
 
       final QuerySnapshot receivedSnapshot = await FirebaseFirestore.instance
@@ -170,7 +170,7 @@ class _TotalOrdersState extends State<TotalOrders>
           _buildOrderCategoryTile(
             label: 'Rejected Orders',
             animation: _rejectedOrdersAnimation,
-            statusFilter: 'Rejected',
+            statusFilter: 'rejected',
           ),
           _buildOrderCategoryTile(
             label: 'Received Orders',
