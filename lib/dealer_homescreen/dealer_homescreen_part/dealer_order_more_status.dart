@@ -94,7 +94,7 @@ class _DealerMoreStatusState extends State<DealerMoreStatus> {
                   child: Text('Download Bill Image'),
                 ),
               ],
-              if (status == 'Dispatched') ...[
+              if (status == 'Dispatched' && status == 'Received') ...[
                 ElevatedButton(
                   onPressed: () {
                     setState(() {
