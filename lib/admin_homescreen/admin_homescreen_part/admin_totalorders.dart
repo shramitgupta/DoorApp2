@@ -157,11 +157,6 @@ class _TotalOrdersState extends State<TotalOrders>
             animation: _totalOrdersAnimation,
             statusFilter: null,
           ),
-          // _buildOrderCategoryTile(
-          //   label: 'Approved Orders',
-          //   animation: _approvedOrdersAnimation,
-          //   statusFilter: 'Approved',
-          // ),
           _buildOrderCategoryTile(
             label: 'New Orders',
             animation: _newOrdersAnimation,
@@ -311,13 +306,36 @@ class OrderListItem extends StatelessWidget {
   final Map<String, dynamic> order;
 
   OrderListItem({required this.order});
+  void _showImageDialog(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          content: SizedBox(
+            width: double.maxFinite,
+            height: double.maxFinite,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.of(context).pop(); // Close the dialog on tap
+              },
+              child: Center(
+                child: InteractiveViewer(
+                  child: Image.network(imageUrl),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final String companyName = order['companyName'];
     final String dealerEmail = order['dealerEmail'];
     final Timestamp? orderTime = order['ordertime']; // Make orderTime nullable
-
+    final String status = order['status'];
     return Card(
       elevation: 4,
       margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -379,6 +397,40 @@ class OrderListItem extends StatelessWidget {
                   fontSize: 14,
                   color: Colors.grey,
                 ),
+              ),
+            if (status == 'Dispatched' ||
+                status == 'Received') // Check for status
+              Column(
+                children: [
+                  SizedBox(height: 8),
+                  InkWell(
+                    onTap: () {
+                      // Show the bilty image dialog
+                      _showImageDialog(context, order['bilty']);
+                    },
+                    child: Text(
+                      'Bilty: Click to View',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  InkWell(
+                    onTap: () {
+                      // Show the bill image dialog
+                      _showImageDialog(context, order['bill']);
+                    },
+                    child: Text(
+                      'Bill: Click to View',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ),
+                ],
               ),
           ],
         ),

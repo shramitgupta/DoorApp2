@@ -55,6 +55,7 @@ dependencies:
   order_tracker: ^0.0.2
   order_tracker_zen: ^1.0.0+4
   share_plus: ^7.1.0
+  http: ^1.1.0
 
 dev_dependencies:
   flutter_test:
