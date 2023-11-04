@@ -433,6 +433,23 @@ class _OrderTileState extends State<OrderTile> {
           Row(
             children: [
               Icon(
+                Icons.tag,
+                color: Colors.grey,
+                size: 18,
+              ),
+              SizedBox(width: 4),
+              Text(
+                widget.id,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Icon(
                 Icons.email,
                 color: Colors.grey,
                 size: 18,

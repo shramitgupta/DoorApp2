@@ -293,7 +293,7 @@ class OrderListScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final order = orders[index].data() as Map<String, dynamic>;
               final documentId = orders[index].id;
-              return OrderListItem(order: order);
+              return OrderListItem(order: order, documentId: documentId);
             },
           );
         },
@@ -304,8 +304,8 @@ class OrderListScreen extends StatelessWidget {
 
 class OrderListItem extends StatelessWidget {
   final Map<String, dynamic> order;
-
-  OrderListItem({required this.order});
+  final String documentId;
+  OrderListItem({required this.order, required this.documentId});
   void _showImageDialog(BuildContext context, String imageUrl) {
     showDialog(
       context: context,
@@ -353,7 +353,24 @@ class OrderListItem extends StatelessWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(
+                  Icons.tag,
+                  color: Colors.grey,
+                  size: 18,
+                ),
+                SizedBox(width: 4),
+                Text(
+                  documentId,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 4),
             Row(
               children: [
                 Icon(

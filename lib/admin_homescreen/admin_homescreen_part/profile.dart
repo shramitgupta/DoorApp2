@@ -11,6 +11,52 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
+  Future<void> deleteDealer() async {
+    final confirmDelete = await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Delete Dealer'),
+          content: Text('Are you sure you want to delete this dealer?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false); // Cancel delete
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true); // Confirm delete
+              },
+              child: Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmDelete == true) {
+      try {
+        // Delete from Firestore collection 'dealer'
+        await FirebaseFirestore.instance
+            .collection('dealer')
+            .doc(widget.documentId)
+            .delete();
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Dealer deleted successfully.'),
+        ));
+
+        // Navigate back to the previous screen after deletion
+        Navigator.of(context).pop();
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error deleting dealer: $e'),
+        ));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -18,6 +64,12 @@ class _ProfileState extends State<Profile> {
         backgroundColor: Colors.brown.shade900,
         centerTitle: true,
         title: Text('Profile'),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: deleteDealer,
+          ),
+        ],
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
