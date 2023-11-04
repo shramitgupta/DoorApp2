@@ -32,7 +32,7 @@ class _DealerMoreStatusState extends State<DealerMoreStatus> {
       StatusItem('Not Approved', true, Icons.question_mark),
       StatusItem('Approved', true, Icons.check_circle),
       StatusItem('Sizing Done', true, Icons.done),
-      StatusItem('Posting Done', true, Icons.check_circle_outline),
+      StatusItem('Pasting Done', true, Icons.check_circle_outline),
       StatusItem('Packing Done', true, Icons.check_circle_outline),
       StatusItem('Dispatched', true, Icons.local_shipping),
       StatusItem('Received', true, Icons.done_all),

@@ -157,11 +157,11 @@ class _TotalOrdersState extends State<TotalOrders>
             animation: _totalOrdersAnimation,
             statusFilter: null,
           ),
-          _buildOrderCategoryTile(
-            label: 'Approved Orders',
-            animation: _approvedOrdersAnimation,
-            statusFilter: 'Approved',
-          ),
+          // _buildOrderCategoryTile(
+          //   label: 'Approved Orders',
+          //   animation: _approvedOrdersAnimation,
+          //   statusFilter: 'Approved',
+          // ),
           _buildOrderCategoryTile(
             label: 'New Orders',
             animation: _newOrdersAnimation,

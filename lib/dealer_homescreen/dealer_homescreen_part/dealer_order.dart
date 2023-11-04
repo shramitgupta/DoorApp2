@@ -19,7 +19,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
   String status = 'Not Approved';
   String approvedtime = '';
   String sizingtime = '';
-  String postingtime = '';
+  String Pastingtime = '';
   String packingtime = '';
   String dispatchtime = '';
   String? bilty = null;
@@ -134,7 +134,7 @@ class _PlaceOrderState extends State<PlaceOrder> {
         "ordertime": currentTime, // Add timestamp field
         "approvedtime": approvedtime,
         "sizingtime": sizingtime,
-        "postingtime": postingtime,
+        "Pastingtime": Pastingtime,
         "packingtime": packingtime,
         "dispatchtime": dispatchtime,
         "bilty": bilty,
