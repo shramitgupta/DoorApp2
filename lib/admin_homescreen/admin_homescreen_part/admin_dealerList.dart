@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:doorapp2/admin_homescreen/admin_homescreen_part/profile.dart';
 import 'package:doorapp2/admin_homescreen/admin_homescreen_part/state_list.dart';
 import 'package:flutter/material.dart';
 
@@ -510,6 +511,7 @@ class _AdminDealerListState extends State<AdminDealerList> {
 
                                     final List<DocumentSnapshot> documents =
                                         snapshot.data!.docs;
+
                                     return ListView.builder(
                                       itemCount: documents.length,
                                       itemBuilder: (context, index) {
@@ -522,22 +524,34 @@ class _AdminDealerListState extends State<AdminDealerList> {
                                         final ranking = (index + 1).toString();
                                         final totalOrderPoints =
                                             docData['totalorders'] ?? 0;
-                                        return Card(
-                                          elevation: 6,
-                                          margin: const EdgeInsets.all(10),
-                                          child: ListTile(
-                                            leading: CircleAvatar(
-                                              backgroundColor:
-                                                  Colors.brown.shade900,
-                                              child: Text(ranking),
-                                            ),
-                                            title: Text(title),
-                                            subtitle: Text(subtitle),
-                                            trailing: Text(
-                                              '$totalOrderPoints',
-                                              style: TextStyle(
-                                                color: Colors.brown.shade900,
-                                                fontWeight: FontWeight.bold,
+                                        final documentId = documents[index].id;
+                                        return InkWell(
+                                          onTap: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => Profile(
+                                                    documentId: documentId),
+                                              ),
+                                            );
+                                          },
+                                          child: Card(
+                                            elevation: 6,
+                                            margin: const EdgeInsets.all(10),
+                                            child: ListTile(
+                                              leading: CircleAvatar(
+                                                backgroundColor:
+                                                    Colors.brown.shade900,
+                                                child: Text(ranking),
+                                              ),
+                                              title: Text(title),
+                                              subtitle: Text(subtitle),
+                                              trailing: Text(
+                                                '$totalOrderPoints',
+                                                style: TextStyle(
+                                                  color: Colors.brown.shade900,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
                                               ),
                                             ),
                                           ),

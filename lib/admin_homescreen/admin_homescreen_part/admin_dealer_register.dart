@@ -442,7 +442,7 @@ class _DealerRegisterState extends State<DealerRegister> {
         ),
         backgroundColor: Colors.brown.shade900,
         title: const Text(
-          'CARPENTER REGISTER',
+          'DEALER REGISTER',
           style: TextStyle(
             fontSize: 27,
             fontWeight: FontWeight.bold,
